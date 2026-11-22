@@ -1,0 +1,1151 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a1520"><style>:root{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style><meta name="robots" content="noindex, nofollow"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Skulltulas"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"><link rel="manifest" href="manifest.webmanifest"></head><body><title>Skulltula Tracker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: a pause-menu look. Night-sky backdrop, gold-framed stone panels, medallion-colored areas.
+   Header holds a token ring with the overall count; areas sit in a 2-up grid; fixed tab bar at the bottom.
+   Single dark theme by choice. */
+:root {
+  --night: #0a1520;
+  --night-2: #10202e;
+  --panel: #142636;
+  --panel-2: #1b3246;
+  --edge: rgba(212, 175, 96, 0.38);
+  --edge-soft: rgba(212, 175, 96, 0.16);
+  --ink: #f1e9d2;
+  --dim: #9fb0b8;
+  --gold: #e8bf55;
+  --gold-hi: #ffe39a;
+  --gold-deep: #9c7a2b;
+  --forest: #74d08a;
+  --fire: #f07c55;
+  --water: #62b6f2;
+  --shadow: #b593f2;
+  --spirit: #f3a64b;
+  --light: #f2d47c;
+  --font-display: "Cinzel", "Trajan Pro", Georgia, serif;
+  --font-body: "Alegreya Sans", "Gill Sans", system-ui, sans-serif;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--night); color: var(--ink); }
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums;
+  min-height: 100%;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--night); }
+a { color: inherit; text-decoration: none; cursor: pointer; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: default; }
+h1, h2, h3, p, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+h1, h2 { text-wrap: balance; }
+:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* Night sky behind everything */
+.sky { position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1px 1px at 72% 9%, rgba(255,255,255,.55), transparent 60%),
+    radial-gradient(1.5px 1.5px at 38% 34%, rgba(255,240,200,.6), transparent 60%),
+    radial-gradient(1px 1px at 88% 41%, rgba(255,255,255,.45), transparent 60%),
+    radial-gradient(1px 1px at 22% 63%, rgba(255,255,255,.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 61% 72%, rgba(255,240,200,.45), transparent 60%),
+    radial-gradient(1px 1px at 8% 88%, rgba(255,255,255,.35), transparent 60%),
+    radial-gradient(1px 1px at 93% 83%, rgba(255,255,255,.4), transparent 60%),
+    radial-gradient(120% 60% at 50% -10%, #1d3a52 0%, transparent 60%),
+    radial-gradient(90% 50% at 50% 110%, #0f2a2a 0%, transparent 70%),
+    var(--night);
+}
+
+.wrap { max-width: 640px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+
+/* Gold-framed panel with corner brackets */
+.panel { position: relative; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--edge); border-radius: 6px; box-shadow: inset 0 0 0 3px rgba(6, 14, 22, 0.55), 0 6px 18px rgba(0, 0, 0, 0.35); }
+.panel::before { content: ""; position: absolute; inset: 4px; border: 1.5px solid var(--gold); border-radius: 3px; pointer-events: none; opacity: .75;
+  -webkit-mask: linear-gradient(#000 0 0) top left / 10px 10px no-repeat, linear-gradient(#000 0 0) top right / 10px 10px no-repeat, linear-gradient(#000 0 0) bottom left / 10px 10px no-repeat, linear-gradient(#000 0 0) bottom right / 10px 10px no-repeat;
+          mask: linear-gradient(#000 0 0) top left / 10px 10px no-repeat, linear-gradient(#000 0 0) top right / 10px 10px no-repeat, linear-gradient(#000 0 0) bottom left / 10px 10px no-repeat, linear-gradient(#000 0 0) bottom right / 10px 10px no-repeat; }
+
+/* Header */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: linear-gradient(180deg, rgba(10, 21, 32, 0.97), rgba(10, 21, 32, 0.9)); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid var(--edge-soft); }
+.top .wrap { padding-block: 12px; display: flex; align-items: center; gap: 14px; }
+.back { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-left: -8px; border-radius: 50%; color: var(--gold); flex: none; transition: background-color .15s ease; }
+.back:hover { background: var(--edge-soft); }
+.ring { position: relative; width: 62px; height: 62px; flex: none; color: var(--gold); }
+.ring svg.track { position: absolute; inset: 0; transform: rotate(-90deg); }
+.ring .emblem { position: absolute; inset: 13px; filter: drop-shadow(0 0 6px rgba(232, 191, 85, 0.45)); }
+.head-text { min-width: 0; flex: 1; display: grid; gap: 2px; }
+.title { font-family: var(--font-display); font-weight: 700; font-size: 21px; line-height: 1.15; letter-spacing: 0.03em; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.top.in-area .title { white-space: normal; font-size: 18px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.sub { font-size: 14px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sub strong { color: var(--gold-hi); font-weight: 700; }
+.score { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--gold); letter-spacing: .02em; }
+.score span { color: var(--dim); font-weight: 500; }
+
+main .wrap { padding-block: 20px calc(100px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 26px; }
+
+/* Ornamental section heading */
+.orn { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 600; font-size: 14px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
+.orn::before, .orn::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--edge)); }
+.orn::after { background: linear-gradient(90deg, var(--edge), transparent); }
+.orn .gem { width: 7px; height: 7px; background: var(--gold); transform: rotate(45deg); flex: none; }
+.orn small { font-family: var(--font-body); letter-spacing: .04em; font-size: 14px; color: var(--dim); text-transform: none; font-weight: 500; }
+.section { display: grid; gap: 14px; }
+
+/* Area cards */
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.area { display: grid; justify-items: center; text-align: center; gap: 8px; padding: 16px 10px 14px; min-width: 0; transition: transform .15s ease, border-color .15s ease; }
+.area:hover { border-color: rgba(232, 191, 85, 0.7); transform: translateY(-1px); }
+.medal { position: relative; width: 64px; height: 64px; color: var(--el); }
+.medal svg.track { position: absolute; inset: 0; transform: rotate(-90deg); }
+.medal .core { position: absolute; inset: 9px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--el) 30%, transparent), rgba(6, 14, 22, 0.8) 70%); border: 1px solid color-mix(in srgb, var(--el) 45%, transparent); }
+.area.done .medal .core { background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--el) 85%, white), var(--el) 55%, color-mix(in srgb, var(--el) 50%, black)); color: #0b1620; box-shadow: 0 0 16px color-mix(in srgb, var(--el) 60%, transparent); }
+.area-name { font-family: var(--font-display); font-weight: 600; font-size: 14.5px; line-height: 1.25; letter-spacing: .02em; min-height: 2.5em; display: flex; align-items: center; }
+.area-count { font-size: 14px; color: var(--dim); }
+.area-count b { color: var(--ink); font-weight: 700; }
+.area.done .area-count b { color: var(--gold-hi); }
+
+/* Area page controls */
+.area-hero { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+.area-hero .medal { width: 56px; height: 56px; flex: none; }
+.area-hero .medal .core { inset: 8px; }
+.area-hero p { color: var(--dim); font-size: 15px; }
+.area-hero b { color: var(--ink); font-family: var(--font-display); font-size: 17px; display: block; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.seg { display: inline-flex; padding: 3px; border: 1px solid var(--edge); border-radius: 99px; background: rgba(6, 14, 22, 0.5); }
+.seg button { padding: 6px 14px; border-radius: 99px; font-size: 14px; font-weight: 700; color: var(--dim); transition: color .15s ease, background-color .15s ease; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--gold); color: #1a1406; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--dim); padding: 6px 2px; }
+.toggle:hover { color: var(--ink); }
+.toggle .sw { width: 34px; height: 20px; border-radius: 99px; background: rgba(6, 14, 22, 0.6); border: 1px solid var(--edge); position: relative; }
+.toggle .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%; background: var(--dim); transition: transform .15s ease, background-color .15s ease; }
+.toggle[aria-pressed="true"] .sw::after { transform: translateX(14px); background: var(--gold); }
+
+/* Skulltula list */
+.list { display: grid; gap: 10px; }
+.item-head { display: flex; align-items: stretch; }
+.open { flex: 1; min-width: 0; text-align: left; padding: 14px 6px 14px 16px; display: grid; gap: 7px; }
+.open:hover .hint { color: var(--gold-hi); }
+.hint { font-family: var(--font-display); font-weight: 600; font-size: 15.5px; line-height: 1.3; letter-spacing: .01em; transition: color .15s ease; }
+.item.got .hint { color: var(--dim); }
+.item.got { border-color: rgba(232, 191, 85, 0.6); background: linear-gradient(180deg, #213a3a, #162a30); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 1px 9px 1px 7px; border-radius: 99px; background: color-mix(in srgb, currentColor 14%, transparent); }
+.chip svg { flex: none; }
+.chip.child { color: var(--forest); }
+.chip.adult { color: var(--water); }
+.chip.both { color: var(--light); }
+.chip.night { color: var(--shadow); }
+.more { font-size: 13px; color: var(--dim); display: inline-flex; align-items: center; gap: 2px; }
+.more svg { transition: transform .2s ease; }
+.item.is-open .more svg { transform: rotate(180deg); }
+.check { flex: none; width: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-left: 1px solid var(--edge-soft); color: #4d6470; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; transition: color .15s ease; }
+.check:hover { color: var(--gold); }
+.check .tok { width: 34px; height: 34px; }
+.check[aria-pressed="true"] { color: var(--gold); }
+.check .tok[viewBox="0 0 32 32"] { width: 42px; height: 42px; }
+.check:not([aria-pressed="true"]) .tok[viewBox="0 0 32 32"] { filter: grayscale(1) brightness(.85); opacity: .38; }
+.tab svg[viewBox="0 0 32 32"] { width: 26px; height: 26px; margin: -2px 0; }
+.tab:not([aria-current="page"]) svg[viewBox="0 0 32 32"] { filter: grayscale(1); opacity: .6; }
+.ring:not(.heart) .emblem { inset: 10px; }
+.check[aria-pressed="true"] .tok { filter: drop-shadow(0 0 7px rgba(232, 191, 85, 0.7)); }
+.check.pop .tok { animation: pop .42s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes pop { 0% { transform: scale(.6) rotate(-12deg); } 100% { transform: scale(1) rotate(0); } }
+.detail { margin: 0 12px 12px; padding: 14px; border-radius: 4px; background: rgba(6, 14, 22, 0.5); border: 1px solid var(--edge-soft); display: grid; gap: 12px; }
+.detail h3 { font-family: var(--font-display); font-size: 12.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
+.detail p { max-width: 62ch; }
+.shot { display: block; width: 100%; border-radius: 4px; overflow: hidden; border: 1px solid var(--edge); aspect-ratio: 16 / 9; max-width: 100%; background: var(--night); }
+.shot img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .2s ease; }
+.shot:hover img { transform: scale(1.02); }
+.lightbox { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: max(16px, env(safe-area-inset-top, 0px)) var(--gutter-r) max(16px, env(safe-area-inset-bottom, 0px)) var(--gutter-l); background: rgba(4, 9, 14, 0.92); }
+.lightbox img { max-width: 100%; max-height: 100%; border-radius: 6px; border: 1px solid var(--edge); }
+.lb-frame { position: relative; display: inline-block; line-height: 0; max-width: 100%; max-height: 100%; }
+.lb-frame img { max-height: calc(100vh - 32px); }
+.media { display: grid; gap: 8px; justify-items: start; }
+.media .seg button { padding: 4px 14px; font-size: 13px; }
+.map { position: relative; display: block; width: 100%; border-radius: 4px; overflow: hidden; border: 1px solid var(--edge); background: #0d1f2e; line-height: 0; }
+.map img { display: block; width: 100%; height: auto; }
+.floor { position: absolute; top: 8px; left: 8px; line-height: 1.2; font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 99px; color: var(--gold-hi); background: rgba(6, 14, 22, 0.82); border: 1px solid var(--edge); }
+.pin { position: absolute; width: 0; height: 0; pointer-events: none; }
+.pin::before, .pin::after { content: ""; position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; }
+.pin::before { background: var(--gold); border: 3px solid #1a1406; box-shadow: 0 0 0 2px var(--gold-hi), 0 0 14px rgba(255, 227, 154, 0.9); }
+.pin::after { border: 2px solid var(--gold-hi); animation: ping 1.6s ease-out infinite; }
+@keyframes ping { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(3.2); opacity: 0; } }
+.lb-frame .pin::before, .lb-frame .pin::after { left: -11px; top: -11px; width: 22px; height: 22px; }
+.needs { display: flex; flex-wrap: wrap; gap: 6px; }
+.need { font-size: 14px; padding: 2px 10px; border-radius: 4px; border: 1px solid var(--edge); color: var(--gold-hi); background: rgba(232, 191, 85, 0.07); }
+.empty { padding: 28px 16px; text-align: center; color: var(--dim); }
+
+/* Rewards path */
+.path { position: relative; display: grid; gap: 14px; padding-left: 0; }
+.path::before { content: ""; position: absolute; left: 27px; top: 28px; bottom: 28px; width: 2px; background: var(--edge-soft); }
+.path .fill { position: absolute; left: 27px; top: 28px; width: 2px; background: linear-gradient(var(--gold-hi), var(--gold)); box-shadow: 0 0 8px rgba(232, 191, 85, .6); }
+.step { position: relative; display: flex; align-items: center; gap: 14px; }
+.node { position: relative; z-index: 1; flex: none; width: 56px; height: 56px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--night-2); border: 2px solid var(--edge); color: var(--dim); }
+.node b { font-family: var(--font-display); font-size: 18px; line-height: 1; color: var(--ink); }
+.node small { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.step.ready .node { border-color: var(--gold); box-shadow: 0 0 14px rgba(232, 191, 85, .5); }
+.step.ready .node b { color: var(--gold-hi); }
+.step.claimed .node { background: radial-gradient(circle at 35% 30%, var(--gold-hi), var(--gold) 55%, var(--gold-deep)); border-color: var(--gold-hi); color: #3a2c08; }
+.step.claimed .node b { color: #2a1f04; }
+.step .panel { flex: 1; min-width: 0; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.r-info { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.r-name { font-family: var(--font-display); font-weight: 700; font-size: 15.5px; }
+.r-desc { font-size: 14px; color: var(--dim); }
+.r-state { font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+.step.locked .r-state { color: var(--dim); }
+.step.ready .r-state { color: var(--gold-hi); }
+.step.claimed .r-state { color: var(--forest); }
+.btn { flex: none; padding: 8px 14px; border-radius: 99px; font-size: 14px; font-weight: 700; border: 1px solid var(--edge); color: var(--gold-hi); background: rgba(232, 191, 85, 0.08); transition: background-color .15s ease, border-color .15s ease; }
+.btn:hover:not(:disabled) { border-color: var(--gold); background: rgba(232, 191, 85, 0.16); }
+.btn:disabled { opacity: .35; }
+.btn[aria-pressed="true"] { color: var(--dim); background: transparent; border-color: var(--edge-soft); }
+.note { font-size: 15px; color: var(--dim); max-width: 62ch; }
+.note-panel { padding: 14px 16px; display: grid; gap: 4px; }
+.note-panel.backup { gap: 8px; margin-top: 20px; }
+.note-panel h3 { font-family: var(--font-display); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.reset-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn.danger { color: #f0a090; border-color: rgba(240, 120, 100, .4); background: rgba(240, 120, 100, .06); }
+.btn.danger:hover { border-color: #f08070; background: rgba(240, 120, 100, .14); }
+.sync { font-size: 13px; color: var(--dim); text-align: center; }
+
+/* Bottom tabs */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: linear-gradient(180deg, rgba(16, 32, 46, 0.95), rgba(8, 16, 24, 0.98)); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--edge); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.tabs .wrap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding-block: 6px; }
+.tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 7px 0 6px; border-radius: 6px; font-family: var(--font-display); font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); transition: color .15s ease, background-color .15s ease; }
+.tab:hover { color: var(--ink); }
+.tab[aria-current="page"] { color: var(--gold-hi); background: rgba(232, 191, 85, 0.1); box-shadow: inset 0 0 0 1px var(--edge); }
+
+
+/* Inventory and locked state */
+.score #leftNow { color: var(--forest); font-family: var(--font-body); font-weight: 700; letter-spacing: 0; }
+.avail { font-size: 12.5px; font-weight: 700; color: var(--forest); padding: 1px 9px; border-radius: 99px; background: rgba(116, 208, 138, 0.12); display: inline-flex; align-items: center; gap: 4px; }
+.avail.none { color: var(--dim); background: rgba(159, 176, 184, 0.1); }
+.area.blocked .medal, .area.blocked .area-name { opacity: .55; filter: grayscale(.7); }
+.item.locked { background: linear-gradient(180deg, #172430, #111c26); border-color: rgba(159, 176, 184, 0.25); }
+.item.locked .hint, .item.locked .chips { opacity: .5; }
+.item.locked .chip { filter: grayscale(1); }
+.item.locked .check { opacity: .55; }
+.needs-line { display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; font-weight: 700; color: #e8a58f; }
+.need { display: inline-flex; align-items: center; gap: 5px; color: var(--dim); border-color: rgba(159, 176, 184, 0.3); background: transparent; transition: border-color .15s ease, color .15s ease; }
+.need:hover { border-color: var(--gold); color: var(--ink); }
+.need.have { color: var(--gold-hi); border-color: var(--edge); background: rgba(232, 191, 85, 0.07); }
+.need-tip { font-size: 13px; color: var(--dim); margin-top: 6px; }
+.toggles { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.items-sum { font-size: 15px; color: var(--dim); text-align: center; }
+.items-sum b { color: var(--gold-hi); }
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.slot { display: grid; justify-items: center; align-content: start; gap: 4px; padding: 12px 6px 10px; border-radius: 8px; text-align: center; background: rgba(6, 14, 22, 0.55); border: 1px solid rgba(159, 176, 184, 0.18); color: #5d7380; transition: border-color .15s ease, background-color .15s ease, color .15s ease; }
+.slot:hover:not(:disabled) { border-color: var(--edge); color: var(--dim); }
+.slot-art { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(159, 176, 184, 0.15); }
+.slot[style*="--note"] .slot-art { color: inherit; }
+.slot-name { font-family: var(--font-display); font-weight: 700; font-size: 12.5px; line-height: 1.2; color: var(--dim); }
+.slot-note { font-size: 12px; line-height: 1.25; color: #5d7380; }
+.slot.on { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border-color: var(--edge); color: var(--gold-hi); }
+.slot.on[style*="--note"] { color: var(--note); }
+.slot.on .slot-art { border-color: currentColor; background: radial-gradient(circle, color-mix(in srgb, currentColor 22%, transparent), transparent 70%); box-shadow: 0 0 12px color-mix(in srgb, currentColor 35%, transparent); }
+.slot.on .slot-name { color: var(--ink); }
+.slot.on .slot-note { color: var(--dim); }
+.slot:disabled { opacity: .75; }
+/* Pieces of Heart */
+:root { --heart: #f0605d; }
+.ring.heart { color: var(--heart); }
+.ring.heart .emblem { inset: 15px; filter: drop-shadow(0 0 6px rgba(240, 96, 93, 0.5)); }
+.check .tok[viewBox="0 0 24 24"] { width: 30px; height: 30px; }
+.item:has(.tok[viewBox="0 0 24 24"]) .check[aria-pressed="true"] { color: var(--heart); }
+.item:has(.tok[viewBox="0 0 24 24"]) .check[aria-pressed="true"] .tok { filter: drop-shadow(0 0 7px rgba(240, 96, 93, 0.7)); }
+.tab[href="#hearts"][aria-current="page"] svg { color: var(--heart); }
+.meter { padding: 14px 16px; display: grid; gap: 8px; justify-items: center; text-align: center; }
+.hearts { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.hm .hm-bg { color: rgba(240, 96, 93, 0.16); stroke: rgba(240, 96, 93, 0.55); stroke-width: 1.2px; }
+.hm .hm-fill { color: var(--heart); }
+@media (max-width: 360px) { .tab { font-size: 10.5px; letter-spacing: .02em; } }
+@media (max-width: 350px) { .grid { grid-template-columns: minmax(0, 1fr); } .area-name { min-height: 0; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="sky" aria-hidden="true"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-token" viewBox="0 0 32 32"><defs><radialGradient id="sk-gold" cx="38%" cy="24%" r="85%"><stop offset="0" stop-color="#fff6c2"/><stop offset=".3" stop-color="#f6cf5c"/><stop offset=".7" stop-color="#d49a2a"/><stop offset="1" stop-color="#8f5d12"/></radialGradient><linearGradient id="sk-shade" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#5a3404" stop-opacity="0"/><stop offset="1" stop-color="#5a3404" stop-opacity=".55"/></linearGradient><linearGradient id="sk-leg" x1="0" y1="10" x2="0" y2="95" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f3d35e"/><stop offset=".5" stop-color="#d09a2c"/><stop offset="1" stop-color="#b0601c"/></linearGradient><linearGradient id="sk-belly" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b2422"/><stop offset=".5" stop-color="#3a2a28"/><stop offset="1" stop-color="#5a1612"/></linearGradient><radialGradient id="sk-ember" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="#ff5a3c"/><stop offset=".7" stop-color="#d4241c"/><stop offset="1" stop-color="#d4241c" stop-opacity="0"/></radialGradient><linearGradient id="sk-steel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f7fa"/><stop offset="1" stop-color="#8c96a2"/></linearGradient></defs><g transform="translate(16 16.800) scale(.345) translate(-54 -55)"><polygon points="44.26,58.68 26.40,63.28 27.60,68.72 45.74,65.32" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="24.26,65.47 21.60,91.92 22.40,92.08 29.74,66.53" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="37.47,60.43 35.51,60.93 36.85,66.99 38.85,66.61" fill="#1d1204"/><polygon points="31.40,61.99 29.43,62.50 30.69,68.14 32.68,67.77" fill="#1d1204"/><polygon points="23.68,71.29 23.38,74.20 27.32,74.96 28.12,72.15" fill="#1d1204"/><polygon points="22.93,78.70 22.64,81.61 25.26,82.11 26.07,79.30" fill="#1d1204"/><polygon points="22.24,85.58 21.95,88.48 23.35,88.76 24.16,85.94" fill="#1d1204"/><circle cx="27.00" cy="66.00" r="3.40" fill="#e9c24a" stroke="#221503" stroke-width="1"/><polygon points="62.26,65.32 80.40,68.72 81.60,63.28 63.74,58.68" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="78.26,66.53 85.60,92.08 86.40,91.92 83.74,65.47" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="69.15,66.61 71.15,66.99 72.49,60.93 70.53,60.43" fill="#1d1204"/><polygon points="75.32,67.77 77.31,68.14 78.57,62.50 76.60,61.99" fill="#1d1204"/><polygon points="79.88,72.15 80.68,74.96 84.62,74.20 84.32,71.29" fill="#1d1204"/><polygon points="81.93,79.30 82.74,82.11 85.36,81.61 85.07,78.70" fill="#1d1204"/><polygon points="83.84,85.94 84.65,88.76 86.05,88.48 85.76,85.58" fill="#1d1204"/><circle cx="81.00" cy="66.00" r="3.40" fill="#e9c24a" stroke="#221503" stroke-width="1"/><polygon points="44.19,52.82 19.98,44.39 18.02,49.61 41.81,59.18" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="16.33,46.21 10.61,73.88 11.39,74.12 21.67,47.79" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="34.99,49.61 32.33,48.69 30.15,54.49 32.77,55.55" fill="#1d1204"/><polygon points="26.76,46.75 24.10,45.82 22.06,51.24 24.68,52.29" fill="#1d1204"/><polygon points="15.07,52.30 14.44,55.34 18.28,56.48 19.41,53.58" fill="#1d1204"/><polygon points="13.47,60.05 12.84,63.09 15.40,63.85 16.53,60.95" fill="#1d1204"/><polygon points="11.98,67.24 11.35,70.29 12.73,70.69 13.86,67.80" fill="#1d1204"/><circle cx="19.00" cy="47.00" r="3.40" fill="#e9c24a" stroke="#221503" stroke-width="1"/><polygon points="66.19,59.18 89.98,49.61 88.02,44.39 63.81,52.82" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="86.33,47.79 96.61,74.12 97.39,73.88 91.67,46.21" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="75.23,55.55 77.85,54.49 75.67,48.69 73.01,49.61" fill="#1d1204"/><polygon points="83.32,52.29 85.94,51.24 83.90,45.82 81.24,46.75" fill="#1d1204"/><polygon points="88.59,53.58 89.72,56.48 93.56,55.34 92.93,52.30" fill="#1d1204"/><polygon points="91.47,60.95 92.60,63.85 95.16,63.09 94.53,60.05" fill="#1d1204"/><polygon points="94.14,67.80 95.27,70.69 96.65,70.29 96.02,67.24" fill="#1d1204"/><circle cx="89.00" cy="47.00" r="3.40" fill="#e9c24a" stroke="#221503" stroke-width="1"/><polygon points="46.87,49.18 27.36,19.51 22.64,22.49 41.13,52.82" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="22.34,20.17 15.61,49.88 16.39,50.12 27.66,21.83" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="39.46,37.91 37.31,34.64 32.07,37.96 34.10,41.29" fill="#1d1204"/><polygon points="32.82,27.82 30.67,24.55 25.79,27.65 27.82,30.98" fill="#1d1204"/><polygon points="20.86,26.71 20.12,29.98 23.94,31.16 25.18,28.05" fill="#1d1204"/><polygon points="18.97,35.03 18.23,38.29 20.79,39.09 22.03,35.97" fill="#1d1204"/><polygon points="17.22,42.75 16.48,46.02 17.86,46.44 19.10,43.33" fill="#1d1204"/><circle cx="25.00" cy="21.00" r="3.40" fill="#e9c24a" stroke="#221503" stroke-width="1"/><polygon points="66.87,52.82 85.36,22.49 80.64,19.51 61.13,49.18" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="80.34,21.83 91.61,50.12 92.39,49.88 85.66,20.17" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="73.90,41.29 75.93,37.96 70.69,34.64 68.54,37.91" fill="#1d1204"/><polygon points="80.18,30.98 82.21,27.65 77.33,24.55 75.18,27.82" fill="#1d1204"/><polygon points="82.82,28.05 84.06,31.16 87.88,29.98 87.14,26.71" fill="#1d1204"/><polygon points="85.97,35.97 87.21,39.09 89.77,38.29 89.03,35.03" fill="#1d1204"/><polygon points="88.90,43.33 90.14,46.44 91.52,46.02 90.78,42.75" fill="#1d1204"/><circle cx="83.00" cy="21.00" r="3.40" fill="#e9c24a" stroke="#221503" stroke-width="1"/><polygon points="50.33,46.31 42.73,12.44 37.27,13.56 43.67,47.69" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="37.39,12.03 29.62,39.86 30.38,40.14 42.61,13.97" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="47.44,33.44 46.61,29.71 40.53,30.97 41.24,34.72" fill="#1d1204"/><polygon points="44.86,21.92 44.02,18.20 38.36,19.36 39.06,23.12" fill="#1d1204"/><polygon points="35.68,18.15 34.82,21.21 38.58,22.61 39.92,19.73" fill="#1d1204"/><polygon points="33.50,25.94 32.65,29.01 35.15,29.93 36.50,27.06" fill="#1d1204"/><polygon points="31.48,33.18 30.63,36.24 31.97,36.74 33.32,33.86" fill="#1d1204"/><circle cx="40.00" cy="13.00" r="3.40" fill="#e9c24a" stroke="#221503" stroke-width="1"/><polygon points="64.33,47.69 70.73,13.56 65.27,12.44 57.67,46.31" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="65.39,13.97 77.62,40.14 78.38,39.86 70.61,12.03" fill="url(#sk-leg)" stroke="#221503" stroke-width="1" stroke-linejoin="round"/><polygon points="66.76,34.72 67.47,30.97 61.39,29.71 60.56,33.44" fill="#1d1204"/><polygon points="68.94,23.12 69.64,19.36 63.98,18.20 63.14,21.92" fill="#1d1204"/><polygon points="68.08,19.73 69.42,22.61 73.18,21.21 72.32,18.15" fill="#1d1204"/><polygon points="71.50,27.06 72.85,29.93 75.35,29.01 74.50,25.94" fill="#1d1204"/><polygon points="74.68,33.86 76.03,36.74 77.37,36.24 76.52,33.18" fill="#1d1204"/><circle cx="68.00" cy="13.00" r="3.40" fill="#e9c24a" stroke="#221503" stroke-width="1"/><path d="M49.5 86c-1.200 3-.800 6 1.500 8.500 1.200-2.800 1.600-5.500 1.300-8zM58.500 86c1.200 3 .800 6-1.500 8.500-1.200-2.800-1.600-5.500-1.300-8z" fill="url(#sk-steel)" stroke="#20242a" stroke-width=".8" stroke-linejoin="round"/><ellipse cx="54" cy="74.500" rx="9.200" ry="12.500" fill="url(#sk-belly)" stroke="#170d0a" stroke-width="1.100"/><ellipse cx="54" cy="80.500" rx="6.800" ry="5.600" fill="url(#sk-ember)"/><circle cx="50.6" cy="79" r="1.25" fill="#ff8a5c"/><circle cx="50.25" cy="78.6" r="0.53" fill="#ffe3c4"/><circle cx="54" cy="78.4" r="1.35" fill="#ff8a5c"/><circle cx="53.65" cy="78.0" r="0.57" fill="#ffe3c4"/><circle cx="57.4" cy="79" r="1.25" fill="#ff8a5c"/><circle cx="57.05" cy="78.6" r="0.53" fill="#ffe3c4"/><circle cx="52.2" cy="82.2" r="1.2" fill="#ff8a5c"/><circle cx="51.85" cy="81.8" r="0.50" fill="#ffe3c4"/><circle cx="55.8" cy="82.2" r="1.2" fill="#ff8a5c"/><circle cx="55.449999999999996" cy="81.8" r="0.50" fill="#ffe3c4"/><circle cx="54" cy="85" r="1" fill="#ff8a5c"/><circle cx="53.65" cy="84.6" r="0.42" fill="#ffe3c4"/><path d="M54 27.500C40 27.500 31.500 37 31.500 48.500c0 5 1.500 9 3.700 12.200L40.500 79l6.500-13.500q7-3.600 14 0L67.500 79l5.300-18.300c2.200-3.200 3.700-7.200 3.700-12.200C76.500 37 68 27.500 54 27.500z" fill="url(#sk-gold)" stroke="#2a1a04" stroke-width="1.300" stroke-linejoin="round"/><path d="M54 27.500C40 27.500 31.500 37 31.500 48.500c0 5 1.500 9 3.700 12.200L40.500 79l6.500-13.500q7-3.600 14 0L67.500 79l5.300-18.300c2.200-3.200 3.700-7.200 3.700-12.200C76.500 37 68 27.500 54 27.500z" fill="url(#sk-shade)"/><path d="M38 41c2.500-6 8-9.800 16-9.800" fill="none" stroke="#fff8d6" stroke-width="2.200" stroke-linecap="round" opacity=".8"/><path d="M36.300 53.500c.300 2.500 1 4.700 2.200 6.600" fill="none" stroke="#fff8d6" stroke-width="1.300" stroke-linecap="round" opacity=".45"/><path d="M36.500 44.500l15.300 6.300c.700 5.800-2.300 9.900-7 9.900-5 0-8.500-4.300-8.700-10.400-.100-2.100.100-4 .400-5.800zM71.500 44.500l-15.300 6.300c-.700 5.800 2.300 9.900 7 9.900 5 0 8.500-4.300 8.700-10.400.100-2.100-.100-4-.400-5.800z" fill="#140c04"/><path d="M37.600 46.200l13.300 5.500" fill="none" stroke="#7a5512" stroke-width=".9" opacity=".9"/><path d="M70.400 46.200l-13.300 5.500" fill="none" stroke="#7a5512" stroke-width=".9" opacity=".9"/><path d="M54 56.500l2.700 7.200-2.700-1.700-2.700 1.700z" fill="#140c04"/></g></symbol>
+    <symbol id="i-forest" viewBox="0 0 24 24"><path fill="currentColor" d="M19.5 3.5C11 3.5 5 8.7 5 15.4c0 1.5.4 2.9 1 4.1l-2 1.9 1.1 1.1 2-2c1.2.8 2.7 1.2 4.3 1.2C18.3 21.7 20.5 12 19.5 3.5zM8.2 17.8l7.2-7.2 1 1-7.2 7.2z"/></symbol>
+    <symbol id="i-fire" viewBox="0 0 24 24"><path fill="currentColor" d="M12.5 2c.6 3.5 4.9 5.6 4.9 11a5.4 5.4 0 0 1-10.8 0c0-2.8 1.4-4.2 2.4-5.8.6 1.2 1 2.3 1.2 3.5 1.7-2.2 2.6-5 2.3-8.7z"/></symbol>
+    <symbol id="i-water" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5s6.8 7.6 6.8 12.2a6.8 6.8 0 0 1-13.6 0C5.2 10.1 12 2.5 12 2.5zm-3.2 12a.9.9 0 0 0-.9 1 4.2 4.2 0 0 0 3.6 3.6.9.9 0 1 0 .2-1.8 2.4 2.4 0 0 1-2-2 .9.9 0 0 0-.9-.8z"/></symbol>
+    <symbol id="i-shadow" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm2.200 3.800a5.200 5.200 0 1 1 0 10.400 5.200 5.200 0 0 1 0-10.400z"/></symbol>
+    <symbol id="i-spirit" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="12" cy="12" r="4.6"/><path d="M11 1.5h2l-.2 4h-1.6zM11 22.5h2l-.2-4h-1.6zM1.5 11v2l4-.2v-1.6zM22.5 11v2l-4-.2v-1.6zM4.2 5.6l1.4-1.4 2.7 3-1.1 1.1zM19.8 18.4l-1.4 1.4-2.7-3 1.1-1.1zM18.4 4.2l1.4 1.4-3 2.7-1.1-1.1zM5.6 19.8l-1.4-1.4 3-2.7 1.1 1.1z"/></g></symbol>
+    <symbol id="i-light" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5l2.6 7.9 7.9 2.6-7.9 2.6L12 22.5l-2.6-7.9L1.5 12l7.9-2.6z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.2l-1.3-1.2C5.6 15.4 2.3 12.4 2.3 8.6 2.3 5.6 4.6 3.3 7.6 3.3c1.7 0 3.3.8 4.4 2 1.1-1.2 2.7-2 4.4-2 3 0 5.3 2.3 5.3 5.3 0 3.8-3.3 6.8-8.4 11.4z"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path fill="currentColor" d="M20.5 14.6A8.8 8.8 0 1 1 9.4 3.5a7 7 0 0 0 11.1 11.1z"/></symbol>
+    <symbol id="i-sword" viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M20.5 3.5l-.7 3.700-9.400 9.400-3-3 9.400-9.400z"/><path fill="none" d="M5.500 11.500l7 7M8 16l-3.500 3.500"/></g></symbol>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="back" id="back" href="#" aria-label="All areas" hidden>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <div class="ring" role="img" id="ring" aria-label="0 of 100 tokens">
+      <svg class="track" viewBox="0 0 62 62" width="62" height="62" aria-hidden="true">
+        <circle cx="31" cy="31" r="28" fill="rgba(6,14,22,.7)" stroke="rgba(212,175,96,.22)" stroke-width="4"/>
+        <circle id="ringArc" cx="31" cy="31" r="28" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="175.9" stroke-dashoffset="175.9" style="transition:stroke-dashoffset .4s ease"/>
+      </svg>
+      <svg class="emblem" viewBox="0 0 32 32" aria-hidden="true"><use id="ringIcon" href="#i-token"/></svg>
+    </div>
+    <div class="head-text">
+      <h1 class="title" id="title">Skulltula Tracker</h1>
+      <p class="score"><b id="total">0</b><span id="totalOf"> / 100 tokens</span><span id="leftNow"></span></p>
+      <p class="sub" id="next"></p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap" id="view"></div>
+</main>
+
+<button type="button" class="lightbox" id="lightbox" aria-label="Close screenshot" hidden><span class="lb-frame"><img alt="Screenshot of this spot"><span class="pin" hidden></span></span></button>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap">
+    <a class="tab" href="#" id="tabAreas">
+      <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><use href="#i-token"/></svg>
+      Skulltulas
+    </a>
+    <a class="tab" href="#hearts" id="tabHearts">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg>
+      Hearts
+    </a>
+    <a class="tab" href="#items" id="tabItems">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>
+      Items
+    </a>
+    <a class="tab" href="#rewards" id="tabRewards">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 22l5-3 5 3-1.5-8"/></svg>
+      Rewards
+    </a>
+  </div>
+</nav>
+
+<script>window.SK_IMG = {"bw1": "img/bw1.jpg", "bw2": "img/bw2.jpg", "bw3": "img/bw3.jpg", "col1": "img/col1.jpg", "col2": "img/col2.jpg", "col3": "img/col3.jpg", "dc1": "img/dc1.jpg", "dc2": "img/dc2.jpg", "dc3": "img/dc3.jpg", "dc4": "img/dc4.jpg", "dc5": "img/dc5.jpg", "dmc1": "img/dmc1.jpg", "dmc2": "img/dmc2.jpg", "dmt1": "img/dmt1.jpg", "dmt3": "img/dmt3.jpg", "dmt4": "img/dmt4.jpg", "fi1": "img/fi1.jpg", "fi3": "img/fi3.jpg", "fi4": "img/fi4.jpg", "fi5": "img/fi5.jpg", "ft1": "img/ft1.jpg", "ft2": "img/ft2.jpg", "ft3": "img/ft3.jpg", "ft4": "img/ft4.jpg", "ft5": "img/ft5.jpg", "gc1": "img/gc1.jpg", "gc2": "img/gc2.jpg", "gf1": "img/gf1.jpg", "gf2": "img/gf2.jpg", "gv1": "img/gv1.jpg", "gv2": "img/gv2.jpg", "gv3": "img/gv3.jpg", "gv4": "img/gv4.jpg", "gy1": "img/gy1.jpg", "gy2": "img/gy2.jpg", "hc1": "img/hc1.jpg", "hc2": "img/hc2.jpg", "hc3": "img/hc3.jpg", "hc4": "img/hc4.jpg", "hcol1": "img/hcol1.webp", "hdmc1": "img/hdmc1.webp", "hdmc2": "img/hdmc2.webp", "hdmc3": "img/hdmc3.webp", "hdmt1": "img/hdmt1.webp", "hf1": "img/hf1.jpg", "hf2": "img/hf2.jpg", "hf3": "img/hf3.jpg", "hgc1": "img/hgc1.webp", "hgf1": "img/hgf1.webp", "hgf2": "img/hgf2.webp", "hgv1": "img/hgv1.webp", "hgv2": "img/hgv2.webp", "hgy1": "img/hgy1.webp", "hgy2": "img/hgy2.webp", "hgy3": "img/hgy3.webp", "hgy4": "img/hgy4.webp", "hhc1": "img/hhc1.webp", "hhc2": "img/hhc2.webp", "hhc3": "img/hhc3.webp", "hhf1": "img/hhf1.webp", "hhf2": "img/hhf2.webp", "hkak1": "img/hkak1.webp", "hkak2": "img/hkak2.webp", "hkak3": "img/hkak3.webp", "hkak4": "img/hkak4.webp", "hlh1": "img/hlh1.webp", "hlh2": "img/hlh2.webp", "hlh3": "img/hlh3.webp", "hllr1": "img/hllr1.webp", "hlw1": "img/hlw1.webp", "hlw2": "img/hlw2.webp", "hw1": "img/hw1.jpg", "hzd1": "img/hzd1.webp", "hzf1": "img/hzf1.webp", "hzf2": "img/hzf2.webp", "hzr1": "img/hzr1.webp", "hzr2": "img/hzr2.webp", "hzr3": "img/hzr3.webp", "hzr4": "img/hzr4.webp", "ic1": "img/ic1.jpg", "ic2": "img/ic2.jpg", "ic3": "img/ic3.jpg", "jb1": "img/jb1.jpg", "jb2": "img/jb2.jpg", "jb3": "img/jb3.jpg", "jb4": "img/jb4.jpg", "kak1": "img/kak1.jpg", "kak2": "img/kak2.jpg", "kak4": "img/kak4.jpg", "kak5": "img/kak5.jpg", "kf1": "img/kf1.jpg", "kf2": "img/kf2.jpg", "kf3": "img/kf3.jpg", "lh1": "img/lh1.jpg", "lh2": "img/lh2.jpg", "lh3": "img/lh3.jpg", "lh4": "img/lh4.jpg", "lh5": "img/lh5.jpg", "llr1": "img/llr1.jpg", "llr2": "img/llr2.jpg", "llr3": "img/llr3.jpg", "lw1": "img/lw1.jpg", "lw2": "img/lw2.jpg", "lw3": "img/lw3.jpg", "sfm1": "img/sfm1.jpg", "sp1": "img/sp1.jpg", "sp2": "img/sp2.jpg", "sp3": "img/sp3.jpg", "sp4": "img/sp4.jpg", "sp5": "img/sp5.jpg", "st1": "img/st1.jpg", "st2": "img/st2.jpg", "st3": "img/st3.jpg", "st4": "img/st4.jpg", "st5": "img/st5.jpg", "wt1": "img/wt1.jpg", "wt2": "img/wt2.jpg", "wt3": "img/wt3.jpg", "wt4": "img/wt4.jpg", "wt5": "img/wt5.jpg", "zd1": "img/zd1.jpg", "zf1": "img/zf1.jpg", "zf2": "img/zf2.jpg", "zf3": "img/zf3.jpg", "zr1": "img/zr1.jpg", "zr2": "img/zr2.jpg", "zr3": "img/zr3.jpg"}; window.SK_MAP = {"kf1": {"src": "maps/7e802ffa8684f3cd.svg", "x": 0.2378, "y": 0.502, "aspect": 1.8072, "floor": ""}, "kf2": {"src": "maps/7e802ffa8684f3cd.svg", "x": 0.5367, "y": 0.4217, "aspect": 1.8072, "floor": ""}, "kf3": {"src": "maps/7e802ffa8684f3cd.svg", "x": 0.5639, "y": 0.6737, "aspect": 1.8072, "floor": ""}, "sfm1": {"src": "maps/30559071ebb5f020.svg", "x": 0.7012, "y": 0.6326, "aspect": 0.2702, "floor": ""}, "hf1": {"src": "maps/2cca33a54d435cd8.svg", "x": 0.6926, "y": 0.6157, "aspect": 1.2855, "floor": ""}, "hf2": {"src": "maps/2cca33a54d435cd8.svg", "x": 0.3337, "y": 0.7605, "aspect": 1.2855, "floor": ""}, "hf3": {"src": "maps/2cca33a54d435cd8.svg", "x": 0.656, "y": 0.7754, "aspect": 1.2855, "floor": ""}, "hc1": {"src": "maps/44d0923e6fd7b7bc.svg", "x": 0.6234, "y": 0.8377, "aspect": 1.1157, "floor": "Child"}, "hc2": {"src": "maps/f8d68c05a87801ca.svg", "x": 0.2497, "y": 0.4038, "aspect": 0.6863, "floor": "Child"}, "hc3": {"src": "maps/f8d68c05a87801ca.svg", "x": 0.6539, "y": 0.3285, "aspect": 0.6863, "floor": "Child"}, "hc4": {"src": "maps/a30a638cbcac739f.svg", "x": 0.7334, "y": 0.6746, "aspect": 0.8719, "floor": "Adult"}, "llr1": {"src": "maps/ca027ad410e8d247.svg", "x": 0.7952, "y": 0.2538, "aspect": 1.0897, "floor": ""}, "llr2": {"src": "maps/ca027ad410e8d247.svg", "x": 0.6497, "y": 0.3192, "aspect": 1.0897, "floor": ""}, "llr3": {"src": "maps/ca027ad410e8d247.svg", "x": 0.1419, "y": 0.7071, "aspect": 1.0897, "floor": ""}, "kak1": {"src": "maps/ec8d8a9fcf46a7b5.svg", "x": 0.3799, "y": 0.5124, "aspect": 1.0687, "floor": "Child"}, "kak2": {"src": "maps/ec8d8a9fcf46a7b5.svg", "x": 0.5153, "y": 0.3682, "aspect": 1.0687, "floor": "Child"}, "kak3": {"src": "maps/ec8d8a9fcf46a7b5.svg", "x": 0.373, "y": 0.277, "aspect": 1.0687, "floor": "Child"}, "kak4": {"src": "maps/ec8d8a9fcf46a7b5.svg", "x": 0.6185, "y": 0.6081, "aspect": 1.0687, "floor": "Child"}, "kak5": {"src": "maps/ec8d8a9fcf46a7b5.svg", "x": 0.4489, "y": 0.6036, "aspect": 1.0687, "floor": "Child"}, "kak6": {"src": "maps/a2991a3861d98c73.svg", "x": 0.5429, "y": 0.9238, "aspect": 1.0665, "floor": "Adult"}, "gy1": {"src": "maps/fad753b7a0f64d86.svg", "x": 0.2834, "y": 0.2108, "aspect": 2.3465, "floor": "Child"}, "gy2": {"src": "maps/48cc191d6b543eda.svg", "x": 0.222, "y": 0.8534, "aspect": 2.3421, "floor": "Adult"}, "dmt1": {"src": "maps/db76ca2b05165069.svg", "x": 0.3585, "y": 0.5754, "aspect": 0.4057, "floor": ""}, "dmt2": {"src": "maps/db76ca2b05165069.svg", "x": 0.3163, "y": 0.742, "aspect": 0.4057, "floor": ""}, "dmt3": {"src": "maps/db76ca2b05165069.svg", "x": 0.7689, "y": 0.2451, "aspect": 0.4057, "floor": ""}, "dmt4": {"src": "maps/db76ca2b05165069.svg", "x": 0.4773, "y": 0.5896, "aspect": 0.4057, "floor": ""}, "dmc1": {"src": "maps/c1ab4bbdc1927767.svg", "x": 0.5953, "y": 0.7854, "aspect": 0.9541, "floor": ""}, "dmc2": {"src": "maps/c1ab4bbdc1927767.svg", "x": 0.6189, "y": 0.4104, "aspect": 0.9541, "floor": ""}, "gc1": {"src": "maps/bd62600104b51d5d.svg", "x": 0.0815, "y": 0.4926, "aspect": 0.9345, "floor": ""}, "gc2": {"src": "maps/bd62600104b51d5d.svg", "x": 0.5456, "y": 0.5357, "aspect": 0.9345, "floor": ""}, "zr1": {"src": "maps/9da62a4f11abba11.svg", "x": 0.2356, "y": 0.484, "aspect": 2.1419, "floor": ""}, "zr2": {"src": "maps/9da62a4f11abba11.svg", "x": 0.8705, "y": 0.2472, "aspect": 2.1419, "floor": ""}, "zr3": {"src": "maps/9da62a4f11abba11.svg", "x": 0.2662, "y": 0.6477, "aspect": 2.1419, "floor": ""}, "zr4": {"src": "maps/9da62a4f11abba11.svg", "x": 0.6981, "y": 0.1866, "aspect": 2.1419, "floor": ""}, "zd1": {"src": "maps/b95e0d63a7da7501.svg", "x": 0.4516, "y": 0.6209, "aspect": 1.5523, "floor": ""}, "zf1": {"src": "maps/ef682defc525b7c8.svg", "x": 0.6332, "y": 0.8206, "aspect": 1.0729, "floor": "Child"}, "zf2": {"src": "maps/ef682defc525b7c8.svg", "x": 0.3592, "y": 0.7465, "aspect": 1.0729, "floor": "Child"}, "zf3": {"src": "maps/7caf49666efec47d.svg", "x": 0.8009, "y": 0.6098, "aspect": 1.041, "floor": "Adult"}, "lh1": {"src": "maps/81029fed8441b630.svg", "x": 0.5573, "y": 0.1684, "aspect": 1.2534, "floor": ""}, "lh2": {"src": "maps/81029fed8441b630.svg", "x": 0.1759, "y": 0.8408, "aspect": 1.2534, "floor": ""}, "lh3": {"src": "maps/81029fed8441b630.svg", "x": 0.5314, "y": 0.2627, "aspect": 1.2534, "floor": ""}, "lh4": {"src": "maps/81029fed8441b630.svg", "x": 0.4774, "y": 0.6024, "aspect": 1.2534, "floor": ""}, "lh5": {"src": "maps/81029fed8441b630.svg", "x": 0.5348, "y": 0.2101, "aspect": 1.2534, "floor": ""}, "gv1": {"src": "maps/254d68e697b8bf52.svg", "x": 0.7813, "y": 0.5882, "aspect": 0.9905, "floor": ""}, "gv2": {"src": "maps/254d68e697b8bf52.svg", "x": 0.4203, "y": 0.6243, "aspect": 0.9905, "floor": ""}, "gv3": {"src": "maps/254d68e697b8bf52.svg", "x": 0.2166, "y": 0.3565, "aspect": 0.9905, "floor": ""}, "gv4": {"src": "maps/254d68e697b8bf52.svg", "x": 0.2818, "y": 0.6151, "aspect": 0.9905, "floor": ""}, "gf1": {"src": "maps/9070082489c25351.svg", "x": 0.4235, "y": 0.293, "aspect": 1.2083, "floor": ""}, "gf2": {"src": "maps/9070082489c25351.svg", "x": 0.847, "y": 0.2188, "aspect": 1.2083, "floor": ""}, "col1": {"src": "maps/b96a8e67771eb6a9.svg", "x": 0.1953, "y": 0.5168, "aspect": 1.2068, "floor": ""}, "col2": {"src": "maps/b96a8e67771eb6a9.svg", "x": 0.5618, "y": 0.3987, "aspect": 1.2068, "floor": ""}, "col3": {"src": "maps/b96a8e67771eb6a9.svg", "x": 0.1471, "y": 0.1621, "aspect": 1.2068, "floor": ""}, "dt1": {"src": "maps/7131d6d95fc34dc1.svg", "x": 0.4676, "y": 0.8318, "aspect": 2.3183, "floor": "Floor 3"}, "dt2": {"src": "maps/f997dee7cf0824c3.svg", "x": 0.9235, "y": 0.2705, "aspect": 1.3116, "floor": "Basement 1"}, "dt3": {"src": "maps/f997dee7cf0824c3.svg", "x": 0.7081, "y": 0.0804, "aspect": 1.3116, "floor": "Basement 1"}, "dt4": {"src": "maps/f997dee7cf0824c3.svg", "x": 0.0707, "y": 0.1611, "aspect": 1.3116, "floor": "Basement 1"}, "dc1": {"src": "maps/9df7f3e24787a2e6.svg", "x": 0.682, "y": 0.76, "aspect": 1.0659, "floor": "Floor 1"}, "dc2": {"src": "maps/4193834d6b36cf47.svg", "x": 0.1189, "y": 0.4334, "aspect": 2.07, "floor": "Floor 2"}, "dc3": {"src": "maps/4193834d6b36cf47.svg", "x": 0.4504, "y": 0.2799, "aspect": 2.07, "floor": "Floor 2"}, "dc4": {"src": "maps/9df7f3e24787a2e6.svg", "x": 0.1109, "y": 0.1082, "aspect": 1.0659, "floor": "Floor 1"}, "dc5": {"src": "maps/9df7f3e24787a2e6.svg", "x": 0.6488, "y": 0.5721, "aspect": 1.0659, "floor": "Floor 1"}, "jb1": {"src": "maps/2296f73815cc3936.svg", "x": 0.729, "y": 0.6303, "aspect": 1.138, "floor": "Basement 1"}, "jb2": {"src": "maps/2296f73815cc3936.svg", "x": 0.3563, "y": 0.3152, "aspect": 1.138, "floor": "Basement 1"}, "jb3": {"src": "maps/2296f73815cc3936.svg", "x": 0.509, "y": 0.1738, "aspect": 1.138, "floor": "Basement 1"}, "jb4": {"src": "maps/d7e133bbf52b3120.svg", "x": 0.8025, "y": 0.726, "aspect": 1.2901, "floor": "Floor 2"}, "ft1": {"src": "maps/79bf55e5fd3ac9ba.svg", "x": 0.6213, "y": 0.8472, "aspect": 0.9515, "floor": "Floor 2"}, "ft2": {"src": "maps/dd87dda0d106bc26.svg", "x": 0.5886, "y": 0.3049, "aspect": 0.9559, "floor": "Floor 1"}, "ft3": {"src": "maps/dd87dda0d106bc26.svg", "x": 0.3104, "y": 0.4148, "aspect": 0.9559, "floor": "Floor 1"}, "ft4": {"src": "maps/dd87dda0d106bc26.svg", "x": 0.8045, "y": 0.23, "aspect": 0.9559, "floor": "Floor 1"}, "ft5": {"src": "maps/3f1bf57ae45da9a1.svg", "x": 0.4046, "y": 0.8835, "aspect": 0.7696, "floor": "Basement 2"}, "fi1": {"src": "maps/3f16cb7f3303f228.svg", "x": 0.6644, "y": 0.1206, "aspect": 1.4249, "floor": "Floor 1"}, "fi2": {"src": "maps/6b4577c27123e03d.svg", "x": 0.7878, "y": 0.2489, "aspect": 1.7411, "floor": "Floor 3"}, "fi3": {"src": "maps/1f1900c6bda81846.svg", "x": 0.7653, "y": 0.4186, "aspect": 2.4109, "floor": "Floor 5"}, "fi4": {"src": "maps/1f1900c6bda81846.svg", "x": 0.7878, "y": 0.1938, "aspect": 2.4109, "floor": "Floor 5"}, "fi5": {"src": "maps/3f16cb7f3303f228.svg", "x": 0.3558, "y": 0.1551, "aspect": 1.4249, "floor": "Floor 1"}, "ic1": {"src": "maps/1ec8568fd796ef74.svg", "x": 0.4055, "y": 0.4088, "aspect": 0.8032, "floor": ""}, "ic2": {"src": "maps/1ec8568fd796ef74.svg", "x": 0.3073, "y": 0.369, "aspect": 0.8032, "floor": ""}, "ic3": {"src": "maps/1ec8568fd796ef74.svg", "x": 0.8775, "y": 0.4411, "aspect": 0.8032, "floor": ""}, "wt1": {"src": "maps/748961d436e3d908.svg", "x": 0.8286, "y": 0.6293, "aspect": 1.1098, "floor": "Basement 1"}, "wt2": {"src": "maps/2b63f4367c0d4722.svg", "x": 0.3056, "y": 0.4771, "aspect": 1.0841, "floor": "Floor 2"}, "wt3": {"src": "maps/091eed0c6c8fcc7e.svg", "x": 0.6747, "y": 0.6485, "aspect": 0.8058, "floor": "Floor 3"}, "wt4": {"src": "maps/07612eaffa38f40c.svg", "x": 0.6944, "y": 0.4181, "aspect": 0.8095, "floor": "Floor 1"}, "wt5": {"src": "maps/2b63f4367c0d4722.svg", "x": 0.8141, "y": 0.775, "aspect": 1.0841, "floor": "Floor 2"}, "bw1": {"src": "maps/b68501c771ee8c19.svg", "x": 0.8821, "y": 0.5529, "aspect": 0.6683, "floor": "Basement 1"}, "bw2": {"src": "maps/b68501c771ee8c19.svg", "x": 0.5481, "y": 0.4589, "aspect": 0.6683, "floor": "Basement 1"}, "bw3": {"src": "maps/b68501c771ee8c19.svg", "x": 0.6391, "y": 0.4637, "aspect": 0.6683, "floor": "Basement 1"}, "st1": {"src": "maps/1e8a9e584a5012aa.svg", "x": 0.2291, "y": 0.8014, "aspect": 1.1437, "floor": "Basement 3"}, "st2": {"src": "maps/1e8a9e584a5012aa.svg", "x": 0.436, "y": 0.362, "aspect": 1.1437, "floor": "Basement 3"}, "st3": {"src": "maps/1e8a9e584a5012aa.svg", "x": 0.936, "y": 0.8563, "aspect": 1.1437, "floor": "Basement 3"}, "st4": {"src": "maps/a551de4d49cb4a18.svg", "x": 0.7769, "y": 0.5628, "aspect": 2.3822, "floor": "Basement 4"}, "st5": {"src": "maps/a551de4d49cb4a18.svg", "x": 0.0934, "y": 0.5524, "aspect": 2.3822, "floor": "Basement 4"}, "sp1": {"src": "maps/6d90d5af6d3d0218.svg", "x": 0.4247, "y": 0.3381, "aspect": 1.0616, "floor": "Floor 1"}, "sp2": {"src": "maps/ff599955dbdf9fe3.svg", "x": 0.6277, "y": 0.1531, "aspect": 1.8969, "floor": "Floor 2"}, "sp3": {"src": "maps/a73b491afd39f076.svg", "x": 0.1155, "y": 0.5671, "aspect": 1.0588, "floor": "Floor 3"}, "sp4": {"src": "maps/6d90d5af6d3d0218.svg", "x": 0.7988, "y": 0.2936, "aspect": 1.0616, "floor": "Floor 1"}, "sp5": {"src": "maps/a73b491afd39f076.svg", "x": 0.3613, "y": 0.1259, "aspect": 1.0588, "floor": "Floor 3"}, "hhf1": {"src": "maps/2cca33a54d435cd8.svg", "x": 0.1842, "y": 0.3667, "aspect": 1.2855, "floor": ""}, "hhf2": {"src": "maps/2cca33a54d435cd8.svg", "x": 0.6974, "y": 0.1171, "aspect": 1.2855, "floor": ""}, "hhc1": {"src": "maps/44d0923e6fd7b7bc.svg", "x": 0.5275, "y": 0.6138, "aspect": 1.1157, "floor": "Child"}, "hhc2": {"src": "maps/44d0923e6fd7b7bc.svg", "x": 0.1398, "y": 0.4843, "aspect": 1.1157, "floor": "Child"}, "hhc3": {"src": "maps/44d0923e6fd7b7bc.svg", "x": 0.3878, "y": 0.4591, "aspect": 1.1157, "floor": "Child"}, "hllr1": {"src": "maps/ca027ad410e8d247.svg", "x": 0.0661, "y": 0.691, "aspect": 1.0897, "floor": ""}, "hkak1": {"src": "maps/ec8d8a9fcf46a7b5.svg", "x": 0.5395, "y": 0.8998, "aspect": 1.0687, "floor": "Child"}, "hkak2": {"src": "maps/a2991a3861d98c73.svg", "x": 0.5835, "y": 0.425, "aspect": 1.0665, "floor": "Adult"}, "hkak3": {"src": "maps/a2991a3861d98c73.svg", "x": 0.7812, "y": 0.4769, "aspect": 1.0665, "floor": "Adult"}, "hkak4": {"src": "maps/ec8d8a9fcf46a7b5.svg", "x": 0.6639, "y": 0.6622, "aspect": 1.0687, "floor": "Child"}, "hgy1": {"src": "maps/fad753b7a0f64d86.svg", "x": 0.5206, "y": 0.6784, "aspect": 2.3465, "floor": "Child"}, "hgy2": {"src": "maps/fad753b7a0f64d86.svg", "x": 0.3546, "y": 0.3438, "aspect": 2.3465, "floor": "Child"}, "hgy3": {"src": "maps/48cc191d6b543eda.svg", "x": 0.2517, "y": 0.2816, "aspect": 2.3421, "floor": "Adult"}, "hgy4": {"src": "maps/48cc191d6b543eda.svg", "x": 0.3678, "y": 0.2472, "aspect": 2.3421, "floor": "Adult"}, "hdmt1": {"src": "maps/db76ca2b05165069.svg", "x": 0.389, "y": 0.5594, "aspect": 0.4057, "floor": ""}, "hgc1": {"src": "maps/bd62600104b51d5d.svg", "x": 0.5412, "y": 0.5751, "aspect": 0.9345, "floor": ""}, "hdmc1": {"src": "maps/c1ab4bbdc1927767.svg", "x": 0.6064, "y": 0.641, "aspect": 0.9541, "floor": ""}, "hdmc2": {"src": "maps/c1ab4bbdc1927767.svg", "x": 0.4053, "y": 0.6673, "aspect": 0.9541, "floor": ""}, "hdmc3": {"src": "maps/c1ab4bbdc1927767.svg", "x": 0.4663, "y": 0.4469, "aspect": 0.9541, "floor": ""}, "hzr1": {"src": "maps/9da62a4f11abba11.svg", "x": 0.409, "y": 0.3266, "aspect": 2.1419, "floor": ""}, "hzr2": {"src": "maps/9da62a4f11abba11.svg", "x": 0.7655, "y": 0.1284, "aspect": 2.1419, "floor": ""}, "hzr3": {"src": "maps/9da62a4f11abba11.svg", "x": 0.4857, "y": 0.1597, "aspect": 2.1419, "floor": ""}, "hzr4": {"src": "maps/9da62a4f11abba11.svg", "x": 0.4313, "y": 0.1613, "aspect": 2.1419, "floor": ""}, "hzd1": {"src": "maps/b95e0d63a7da7501.svg", "x": 0.4453, "y": 0.5254, "aspect": 1.5523, "floor": ""}, "hzf1": {"src": "maps/7caf49666efec47d.svg", "x": 0.9052, "y": 0.2916, "aspect": 1.041, "floor": "Adult"}, "hzf2": {"src": "maps/7caf49666efec47d.svg", "x": 0.6901, "y": 0.3492, "aspect": 1.041, "floor": "Adult"}, "hlh1": {"src": "maps/81029fed8441b630.svg", "x": 0.7759, "y": 0.5081, "aspect": 1.2534, "floor": ""}, "hlh2": {"src": "maps/81029fed8441b630.svg", "x": 0.5148, "y": 0.2296, "aspect": 1.2534, "floor": ""}, "hlh3": {"src": "maps/81029fed8441b630.svg", "x": 0.5537, "y": 0.2122, "aspect": 1.2534, "floor": ""}, "hgv1": {"src": "maps/254d68e697b8bf52.svg", "x": 0.4225, "y": 0.7518, "aspect": 0.9905, "floor": ""}, "hgv2": {"src": "maps/254d68e697b8bf52.svg", "x": 0.5053, "y": 0.1146, "aspect": 0.9905, "floor": ""}, "hgf1": {"src": "maps/9070082489c25351.svg", "x": 0.3341, "y": 0.1953, "aspect": 1.2083, "floor": ""}, "hgf2": {"src": "maps/9070082489c25351.svg", "x": 0.5054, "y": 0.7148, "aspect": 1.2083, "floor": ""}, "hcol1": {"src": "maps/b96a8e67771eb6a9.svg", "x": 0.2766, "y": 0.4824, "aspect": 1.2068, "floor": ""}};</script>
+<script>
+// ---------- Data ----------
+// [id, age, time, items, hint, where, how]   age: C child, A adult, B either/both   time: N night, "" any
+const AREAS = [
+  { id: "kokiri-forest", name: "Kokiri Forest", group: "Overworld", list: [
+    ["kf1","C","N","", "Back wall of a know-it-all's home", "The house in the southwest corner of Kokiri Forest, where the Know-It-All Brothers live. The Skulltula is on its back (west) wall.", "Come as young Link at night. From the village center, head to the southwest corner, walk around behind that house and cut the Skulltula down with your sword. The token drops within reach."],
+    ["kf2","C","","Bottled bug", "Loose soil behind the shop", "Soft soil patch behind the Kokiri Shop.", "Release bugs from a bottle onto the soil. A Gold Skulltula crawls out; defeat it and grab the token."],
+    ["kf3","A","N","Hookshot", "High on the twins' house", "High on the back wall of the House of Twins, on the south-east side of the village.", "Return as adult Link at night. Look up at the back wall, Hookshot the Skulltula, then Hookshot the token to pull it in."],
+  ]},
+  { id: "lost-woods", name: "Lost Woods & Sacred Forest Meadow", group: "Overworld", list: [
+    ["lw1","C","","Bottled bug", "Soil on the way to the Skull Kid", "Lost Woods: take the left path from the Kokiri Forest entrance toward the Skull Kid's stump. The soft soil is in that clearing.", "Release bugs on the soil, defeat the Skulltula that appears, and take the token."],
+    ["lw2","C","","Bottled bug", "Soil beside the scrub merchants", "The Lost Woods clearing with two Deku Scrubs. From the Kokiri entrance: right, left, right, left, left.", "Release bugs on the soft soil behind the Business Scrub and defeat the Skulltula."],
+    ["lw3","A","N","Magic Bean", "A beanstalk ride among the scrubs", "Same Deku Scrub clearing as the soil Skulltula, up on a high ledge.", "As young Link, plant a Magic Bean in that soil. Come back as adult Link at night, ride the bean platform up to the ledge, and defeat the Skulltula there."],
+    ["sfm1","A","N","Hookshot", "Above the meadow maze", "Sacred Forest Meadow, on the upper east wall near the maze entrance, close to where Saria waited.", "Enter the Moblin maze as adult Link at night. Look up at the wall near the start and Hookshot the Skulltula, then the token."],
+  ]},
+  { id: "hyrule-field", name: "Hyrule Field", group: "Overworld", list: [
+    ["hf1","C","","", "A lone tree near the forest", "Eastern Hyrule Field, a single tree standing by the stream shortly after you leave Kokiri Forest.", "Roll into the tree as young Link and a Gold Skulltula drops out. If nothing falls, come back at night."],
+    ["hf2","B","","Bombs, Boomerang or Hookshot", "A hidden grotto south of the ranch", "A bombable grotto in a cluster of trees south of Lon Lon Ranch, on the way to Lake Hylia.", "Bomb the ground to open the grotto. Defeat the enemies inside, then pull the token off the wall with the Boomerang (young) or Hookshot (adult)."],
+    ["hf3","B","","Bombs", "A crate in a marsh grotto", "A grotto in the marshy area south-east of Lon Lon Ranch.", "As young Link, bomb open the grotto and defeat the Skulltula inside. Come back as adult Link and break the crate to finish this one."],
+  ]},
+  { id: "hyrule-castle", name: "Hyrule Castle & Market", group: "Overworld", list: [
+    ["hc1","C","","", "A twitching crate in town", "Market Guard House, the pot-filled room through the door on the right just past the drawbridge. The shaking crate sits at the back.", "Roll into the bouncing crate to break it and defeat the Skulltula inside."],
+    ["hc2","C","","", "A tree on the castle grounds", "Hyrule Castle grounds, the lone tree near the climbable vines and barrels before the moat.", "Roll into the tree and a Gold Skulltula drops out."],
+    ["hc3","C","","Song of Storms, Bombs, Boomerang", "A storm-opened hole by the moat", "The corner tree near where Talon was sleeping, on the side facing Castle Town.", "Play the Song of Storms by the tree to open a grotto. Drop in, bomb the hidden wall, and grab the token with the Boomerang."],
+    ["hc4","A","","Hookshot", "On the arch before Ganon's Castle", "Ruined approach to Ganon's Castle, high on the large stone archway past the broken gate, east of the road.", "As adult Link, look up at the archway and Hookshot the Skulltula, then the token."],
+  ]},
+  { id: "lon-lon-ranch", name: "Lon Lon Ranch", group: "Overworld", list: [
+    ["llr1","C","","", "A tree behind the cucco house", "The tree on the path behind the house where Talon runs the Super Cucco game, in front of the tower.", "Roll into the tree as young Link to knock the Skulltula loose."],
+    ["llr2","C","N","Boomerang", "Under a window by the stables", "The wall below Malon's house window, above the passage toward the horse pasture.", "At night, hit it with the Boomerang. Throw it again to bring the token back."],
+    ["llr3","C","N","Boomerang", "Inside the ruined tower", "The small storage tower at the south-west edge of the racetrack, above the stacked crates.", "Go inside at night and use the Boomerang to defeat the Skulltula and fetch the token."],
+  ]},
+  { id: "kakariko", name: "Kakariko Village & Graveyard", group: "Overworld", list: [
+    ["kak1","C","N","", "A tree by the village gate", "The big tree in the lower part of Kakariko Village, near the entrance from Hyrule Field.", "Come as young Link at night and roll into the tree to drop the Skulltula."],
+    ["kak2","C","N","Slingshot", "Climbing the watchtower ladder", "On the ladder near the top of the village watchtower.", "At night, shoot it down with the Slingshot before climbing, then climb up for the token."],
+    ["kak3","C","N","", "A house near the mountain gate", "On the outside wall of the house before the Death Mountain gate.", "Visit at night as young Link and defeat it with your sword."],
+    ["kak4","C","N","", "Beside a cursed family's door", "On the wall right beside the House of Skulltula's front door.", "Visit at night as young Link. It sits low enough to reach with your sword."],
+    ["kak5","C","N","", "Up the construction site ramp", "On the brick wall and wooden framework of the construction site near the village entrance. Walk up the ramp.", "Visit at night as young Link, climb the ramp, and defeat it."],
+    ["kak6","A","N","Hookshot", "Above Impa's house", "The south (back) wall up on the roof of Impa's House.", "As adult Link at night, get onto the roof of Impa's House, look at the south wall, and Hookshot the Skulltula and its token."],
+    ["gy1","C","","Bottled bug", "Soil among the graves", "Kakariko Graveyard, soft soil on the left side of the north wall.", "Release bugs on the soil and defeat the Skulltula that crawls out."],
+    ["gy2","B","N","Boomerang or Hookshot", "Behind the gravekeeper's hut", "High up in the narrow gap between the back of Dampé's hut and the Graveyard wall, by the Graveyard entrance. By day a golden web marks the spot.", "Come at night. Defeat it with the Boomerang (young Link) or the Hookshot (adult Link), then use the same item to fetch the token."],
+  ]},
+  { id: "death-mountain-trail", name: "Death Mountain Trail", group: "Overworld", list: [
+    ["dmt1","C","","Bottled bug, Bombs or Goron's Bracelet", "Soil by the cavern mouth", "Soft soil next to the Dodongo's Cavern entrance, revealed once the boulder in front of it is blown up.", "Clear the boulder with a Bomb Flower or bomb, then release bugs on the soil."],
+    ["dmt2","B","","Bombs", "A cracked wall on the trail", "Behind a bombable wall on the right side of the trail, on the road back toward Kakariko.", "Bomb the cracked wall and defeat the Skulltula behind it."],
+    ["dmt3","A","N","Megaton Hammer", "A boulder below the summit", "The top of the trail where rocks rained on you as a child, at the foot of the climbable wall up to the summit. The rock pile is on the right as you face the wall, by the stone arch.", "Come as adult Link at night and smash the rocks with the Megaton Hammer to free the Skulltula."],
+    ["dmt4","A","N","Megaton Hammer", "A boulder by the Goron door", "The railed landing above Dodongo's Cavern, next to the turn-off to Goron City. The rocks sit against the wall.", "Come as adult Link at night and smash the rocks with the Megaton Hammer."],
+  ]},
+  { id: "death-mountain-crater", name: "Death Mountain Crater", group: "Overworld", list: [
+    ["dmc1","C","","", "Crates in the heat", "The wooden crates near the Crater entrance from the summit.", "Roll into the crates quickly, before the heat timer hurts you, and defeat the Skulltula inside."],
+    ["dmc2","C","","Bolero of Fire, Bottled bug", "Soil by the fire warp", "Soft soil next to the Bolero of Fire warp pad, near the Fire Temple.", "Warp in as young Link with the Bolero of Fire and release bugs on the soil. Move fast to avoid heat damage."],
+  ]},
+  { id: "goron-city", name: "Goron City", group: "Overworld", list: [
+    ["gc1","C","","Bombs", "A crate in the treasure maze", "The boulder maze room with the chests on the top floor, in a crate in the back corner.", "Bomb through the boulders, then roll into the crate near the chests."],
+    ["gc2","A","","Hookshot", "Under the hanging platform", "The central platform hanging on ropes in the middle of Goron City.", "As adult Link, check behind and under the stone platform and Hookshot the Skulltula."],
+  ]},
+  { id: "zoras-river", name: "Zora's River", group: "Overworld", list: [
+    ["zr1","C","","Bottled bug", "Soil by the bean seller", "Soft soil next to the Magic Bean salesman. This one moved in the remake.", "Release bugs on the soil. Plant a Magic Bean here too for a later adult Skulltula."],
+    ["zr2","C","N","", "Behind rocks at the riverbed", "The far end of Zora's River, by the waterfall to Zora's Domain, down at the water's edge on the low rock wall.", "Come as young Link at night. From the grassy ledge beside the waterfall, climb down to the bank and cut the Skulltula down with your sword."],
+    ["zr3","A","N","Magic Bean, Hookshot", "A bean ride up the river", "A high ledge reached from the bean plant by the salesman.", "Plant a Magic Bean in the soil as young Link. Ride the plant as adult Link at night and Hookshot the Skulltula on the nearby wall."],
+    ["zr4","A","N","Hookshot", "A cliff near the Zora gate", "The west cliff wall near the stairs and final bridge before Zora's Domain.", "Visit as adult Link at night and Hookshot it off the wall."],
+  ]},
+  { id: "zoras-domain", name: "Zora's Domain", group: "Overworld", list: [
+    ["zd1","A","N","Hookshot", "Beside the frozen diving falls", "On the wall left of the diving-game waterfall, near the top, once the Domain is frozen.", "Climb to the high ledge where the diving game used to start and Hookshot the Skulltula."],
+  ]},
+  { id: "zoras-fountain", name: "Zora's Fountain", group: "Overworld", list: [
+    ["zf1","C","","", "A tree by the silver boulder", "The group of trees on the south-east side of the fountain, near the silver boulder. It's the tree on the right.", "Roll into the tree to drop the Skulltula."],
+    ["zf2","C","N","Boomerang", "Atop a sunken ruin", "On top of the slanted ruin south-west of Lord Jabu-Jabu.", "Visit at night and use the Boomerang to defeat it and fetch the token."],
+    ["zf3","A","N","Silver Gauntlets, Lens of Truth, Hookshot", "A cave under the silver boulder", "Inside the hidden cave beneath the silver boulder in the south-east corner.", "Lift the boulder with the Silver Gauntlets. Use the Lens of Truth against the invisible enemies, climb the vines, then turn around and Hookshot the Skulltula on the ceiling."],
+  ]},
+  { id: "lake-hylia", name: "Lake Hylia", group: "Overworld", list: [
+    ["lh1","C","","Bottled bug", "Soil beside the laboratory", "Soft soil on the west side of the Lakeside Laboratory.", "Release bugs on the soil and defeat the Skulltula."],
+    ["lh2","C","","", "A crawlspace on the far shore", "The far south-west corner of Lake Hylia. Follow the west shore south to the end, then swim to the small outcrop beside it. The crawlspace is a low gap with a stone lintel in its rock wall. This one moved in the remake.", "As young Link, crawl through the gap into the small cave and defeat the Skulltula on the far wall."],
+    ["lh3","C","N","Boomerang", "The lab wall seen from the bridge", "The back wall of the Lakeside Laboratory, visible from the bridge outside.", "At night, stand on the bridge and use the Boomerang to defeat it and bring the token back."],
+    ["lh4","A","N","Longshot", "Top of the island tree", "The upper branches of the tall tree on the central island.", "As adult Link at night, Longshot up to the Skulltula in the tree."],
+    ["lh5","A","","Iron Boots, Hookshot", "The bottom of the lab's tank", "At the bottom of the Lakeside Laboratory's diving tank.", "Put on the Iron Boots, sink to the bottom of the tank, and Hookshot the shaking crate to break it."],
+  ]},
+  { id: "gerudo-valley", name: "Gerudo Valley", group: "Overworld", list: [
+    ["gv1","C","N","Boomerang", "Under the first bridge", "Underneath the small wooden bridge just past the valley entrance.", "At night, Boomerang it from above, then fetch the token."],
+    ["gv2","C","","Bottled bug, Cucco", "Soil beside the river cow", "Soft soil on the riverbank below the main bridge, next to the cow and a crate.", "Carry a Cucco from the entrance and glide down to the ledge, then release bugs on the soil."],
+    ["gv3","A","N","Longshot or Epona", "Behind the carpenters' tent", "The back wall of the Carpenters' tent across the broken bridge.", "Cross the gap by Longshot or by jumping it on Epona, then defeat it at night."],
+    ["gv4","A","N","Hookshot", "On the stone arch", "The top of the large natural stone arch near the tent.", "Visit at night and Hookshot the Skulltula and its token."],
+  ]},
+  { id: "gerudo-fortress", name: "Gerudo's Fortress", group: "Overworld", list: [
+    ["gf1","A","N","Hookshot or Longshot", "On the eastern rooftops", "On a wall of the eastern fortress rooftops, near the spot where Pierre can be summoned.", "Climb the rooftops at night and Hookshot it. Works during or after the carpenter rescue."],
+    ["gf2","A","N","Gerudo Membership Card, Hookshot", "Behind an archery target", "The back of the far (north-east) target at the horseback archery range.", "With the Gerudo Membership Card, enter the range at night and Hookshot the Skulltula behind the target."],
+  ]},
+  { id: "haunted-wasteland", name: "Haunted Wasteland", group: "Overworld", list: [
+    ["hw1","A","","", "Beneath a desert shelter", "The basement of the small stone building in the middle of the desert.", "Follow the flags to the shelter, go down the ladder, and defeat the Skulltula on the wall."],
+  ]},
+  { id: "desert-colossus", name: "Desert Colossus", group: "Overworld", list: [
+    ["col1","C","","Requiem of Spirit, Bottled bug", "Soil by the temple door", "Soft soil to the left of the Spirit Temple entrance.", "Warp in as young Link with the Requiem of Spirit and release bugs on the soil. Plant a Magic Bean here too."],
+    ["col2","A","N","Magic Bean", "A bean ride to a lonely rock", "A rock formation reached by the bean plant from the temple soil.", "After planting a bean as young Link, ride the plant as adult Link at night to the rock holding the Skulltula."],
+    ["col3","A","N","Longshot", "Where the birds circle", "The north-west cliff wall near the Spirit Temple entrance, where the Guays fly.", "Visit at night and Longshot the Skulltula off the wall."],
+  ]},
+  { id: "deku-tree", name: "Great Deku Tree", group: "Dungeons", list: [
+    ["dt1","C","","", "A side ledge in the compass room", "The wall in the Compass room on the third floor, reached by the raised platforms.", "Cross the platforms, head to the left side, and defeat the Skulltula on the wall."],
+    ["dt2","C","","Slingshot", "Vines behind you on the way back up", "The basement vines near the broken web, behind you as you climb back up.", "After dropping through the web, turn around on the vines and shoot it with the Slingshot."],
+    ["dt3","C","","Slingshot", "Behind a basement grate", "Through the barred gate on the north side of the basement water room.", "Stand on the nearby platform and shoot it through the bars with the Slingshot."],
+    ["dt4","C","","Deku Stick, Slingshot", "Behind a burnable web", "The Gohma Larva room, on vines behind the web on the left.", "Light a Deku Stick on a torch and burn the web, then shoot the Skulltula on the vines."],
+  ]},
+  { id: "dodongos-cavern", name: "Dodongo's Cavern", group: "Dungeons", list: [
+    ["dc1","B","","Bombs or Goron's Bracelet", "A hidden room off the south-east hall", "First floor, behind a cracked wall on the right of the south-east corridor.", "Bomb the wall (or let a Baby Dodongo blow it) and defeat the Skulltula inside."],
+    ["dc2","B","","Slingshot", "Behind a grate in the stair room", "Second floor staircase room, on the net in front of the door opposite the ladder.", "Lower the big staircase with Bomb Flowers, then shoot it through the grate with the Slingshot."],
+    ["dc3","C","","Bombs or Goron's Bracelet", "A wall guarded by two Dodongos", "Second floor, in the room with two Dodongos, behind a cracked wall in the north passage.", "Bomb the wall and defeat the Skulltula."],
+    ["dc4","B","","Bombs", "Past the skull's mouth, behind the Armos", "Past the giant Dodongo skull, in the block-pushing area, behind a cracked wall guarded by an Armos.", "Bomb the wall, deal with the Armos and Baby Dodongos, then take the token."],
+    ["dc5","A","","Scarecrow's Song, Hookshot", "A ledge only Pierre can reach", "A raised ledge in the south-east corridor, near the first hidden Skulltula.", "As adult Link, play the Scarecrow's Song to summon Pierre and Hookshot up to the ledge."],
+  ]},
+  { id: "jabu-jabu", name: "Jabu-Jabu's Belly", group: "Dungeons", list: [
+    ["jb1","C","","", "Vines across from the map chest", "Basement, the pool room with the water switch, high on the vines across from the Dungeon Map chest. It sits above a ledge with three jars.", "Leave Ruto sitting on the switch so the water rises, swim to the vines, climb to the ledge and defeat the Skulltula."],
+    ["jb2","C","","Boomerang", "Below a hole you open later", "Basement north wall, reached by dropping through the hole left after the three tentacles are gone.", "Drop through and use the Boomerang to defeat it and fetch the token."],
+    ["jb3","C","","Boomerang", "On a tunnel ceiling nearby", "The ceiling of the tunnel right beside the previous Skulltula.", "Look up as you walk the tunnel and Boomerang it down."],
+    ["jb4","C","","Boomerang", "A vine pillar before the boss", "The tall vine-covered pillar in the last room before Barinade.", "Boomerang it from the floor before heading to the boss."],
+  ]},
+  { id: "forest-temple", name: "Forest Temple", group: "Dungeons", list: [
+    ["ft1","A","","Hookshot", "Up the vines at the very start", "First room, upper wall past the vines on the right.", "Climb the vines right after entering and Hookshot the Skulltula."],
+    ["ft2","A","","Hookshot", "In the hall where the flames were stolen", "Central chamber, on the wall beside the upper walkway, facing away from the north door.", "From the north door area, look left and Hookshot it without going through."],
+    ["ft3","A","","Hookshot", "Below the floor after the eye switch", "A ledge below the floor, at the exit of the passage on the Boss Key route.", "Drop through the hole, go out to the balcony, follow the ledge south, and Hookshot it."],
+    ["ft4","A","","Scarecrow's Song, Hookshot", "A hidden balcony above a doorway", "A platform above the north-east door after the blue corridor.", "Push the block for the shortcut, summon Pierre with the Scarecrow's Song, and Hookshot up."],
+    ["ft5","A","","Hookshot", "A basement alcove", "Basement, the southern alcove reached after the last Poe Sister and the elevator.", "During the room-rotation area, Hookshot the Skulltula in the alcove."],
+  ]},
+  { id: "fire-temple", name: "Fire Temple", group: "Dungeons", list: [
+    ["fi1","A","","Song of Time, Hookshot", "Ride the rising platform", "Eastern lava room, top-left rising platform, then up past a blue Time Block toward the Flying Tiles room.", "Ride the platform up, play the Song of Time to move the block, and Hookshot the Skulltula behind it."],
+    ["fi2","A","","Bombs", "A false wall in the boulder maze", "Rolling boulder maze, a cracked wall on the north side.", "Dodge the boulders and bomb the wall."],
+    ["fi3","A","","Scarecrow's Song, Hookshot", "Pierre near the top of the maze", "A secret room near the top of the boulder maze.", "Summon Pierre with the Scarecrow's Song and Hookshot to the hidden lift."],
+    ["fi4","A","","Hookshot", "Overlooking the lava, one room on", "The wall above the lava in the room past the door beyond Pierre's room.", "Go through the next door and Hookshot it quickly."],
+    ["fi5","A","","Megaton Hammer, Small Key", "Smash your way past the entrance statue", "The first room: the doorway on the right, behind the statue.", "Smash the statue with the Megaton Hammer, go through the locked passage, and smash the rock on the back wall."],
+  ]},
+  { id: "ice-cavern", name: "Ice Cavern", group: "Dungeons", list: [
+    ["ic1","A","","Hookshot", "Among the spinning blades", "The south-west wall of the room with the spinning ice blade, high up.", "Time it between blade passes and Hookshot the Skulltula."],
+    ["ic2","A","","Blue Fire, Hookshot", "Up and right from the compass", "Behind the red ice in the Compass room, above and to the right of the chest.", "Melt the red ice with Blue Fire and Hookshot the Skulltula."],
+    ["ic3","A","","Blue Fire, Hookshot", "Over the sliding-block door", "Above the doorway into the ice block puzzle room.", "Melt the red ice, turn back toward the doorway, and Hookshot it."],
+  ]},
+  { id: "water-temple", name: "Water Temple", group: "Dungeons", list: [
+    ["wt1","A","","Iron Boots, Hookshot", "Under the central tower", "Basement path below the central pillar.", "Raise the water to the middle level, sink beneath the platform with the Iron Boots, follow the passage, and hit the switch to reach it."],
+    ["wt2","A","","Longshot, Iron Boots", "Above the whirlpool corridor", "Above the water near one of the last bends in the whirlpool passage.", "Walk the passage with the Iron Boots and Longshot it on the wall."],
+    ["wt3","A","","Longshot", "Top of the central column", "The upper platform inside the central tower, above the Triforce symbol.", "Longshot up from the platform."],
+    ["wt4","A","","Longshot", "Where the boulders fall", "Behind the waterfall in the rolling boulder hall on the Boss Key route.", "Longshot up through the opening where the boulders drop."],
+    ["wt5","A","","Bombs, Iron Boots", "A blue-lit cracked wall", "East side, in the blue-lit room, with the water at the middle level. This one moved in the remake.", "Bomb the cracked wall when you surface in the room and grab the token."],
+  ]},
+  { id: "bottom-of-the-well", name: "Bottom of the Well", group: "Dungeons", list: [
+    ["bw1","C","","Lens of Truth, Boomerang", "A Like Like's room", "The room behind the north-east door, reached by the eastern passage.", "Use the Lens to find the safe path, deal with the Like Like, and Boomerang the token."],
+    ["bw2","C","","Small Key, Boomerang", "A locked room to the west", "The west locked room off the central chamber, near a Deku Baba.", "Unlock the door and Boomerang the Skulltula on the back wall."],
+    ["bw3","C","","Small Key, Lens of Truth, Boomerang", "The end of an invisible walkway", "High wall at the end of a hidden path behind the east locked door.", "Use the Lens to walk the invisible path, then Boomerang it."],
+  ]},
+  { id: "shadow-temple", name: "Shadow Temple", group: "Dungeons", list: [
+    ["st1","A","","Lens of Truth, Hookshot", "Between two chests by the scythe", "Side room past the invisible spinning scythe, on the wall between two chests (one invisible).", "Beat the Like Like, then Hookshot the Skulltula between the chests."],
+    ["st2","A","","Hookshot", "Above the falling spikes", "The wall above the falling-spike traps, from the upper platforms in the block room.", "Push the block, climb onto the spikes, go left, and Hookshot it."],
+    ["st3","A","","Longshot", "Look back in the fan corridor", "Fan corridor, on the wall below after crossing the gap.", "After Hookshotting over the gap, turn around and grab it."],
+    ["st4","A","","Scarecrow's Song, Longshot", "A ledge near the ghost ship dock", "An elevated platform near the boat area.", "Pull the block for a shortcut, summon Pierre, and Longshot up."],
+    ["st5","A","","Bombs", "Three spinning skull pots", "The room with three rotating skull pots.", "Bomb the pots to reveal it and collect the token."],
+  ]},
+  { id: "spirit-temple", name: "Spirit Temple", group: "Dungeons", list: [
+    ["sp1","C","","Boomerang", "Behind a grate in the child path", "Child section, through the right-hand door past the west crawlspace, on a metal grate.", "Boomerang it through the grate."],
+    ["sp2","C","","", "Behind the giant statue", "North-east corner of the large central statue chamber, second floor.", "Walk around behind the north-east side of the statue and defeat it."],
+    ["sp3","C","","Boomerang", "Above a door you just used", "Above the door in the passage after the five-crystal room.", "Turn around after entering and Boomerang it down."],
+    ["sp4","A","","Silver Gauntlets, Song of Time", "Behind a blue block in the boulder room", "An alcove behind a blue Time Block in the rolling boulder chamber.", "Play the Song of Time to move the block and take the token."],
+    ["sp5","A","","Scarecrow's Song, Longshot", "Pierre in the statue room", "The upper north-west platform in the statue room, near the hand holding a chest.", "Summon Pierre with the Scarecrow's Song and Longshot to him."],
+  ]},
+];
+
+// Pieces of Heart, same row format. Checked against KeenGamer's and RPG Site's remake lists and Nintenduo's remake map.
+const HEART_AREAS = [
+  { id: "lost-woods", list: [
+    ["hlw1","C","","Saria's Song", "A lonely stump-sitter", "Lost Woods, the first path on the left from Kokiri Forest. A Skull Kid plays his flute on a tall stump.", "Stand on the low stump facing him and play Saria's Song. He gives you the piece."],
+    ["hlw2","C","","", "Copy the duo's tunes", "Lost Woods, the first path on the right from Kokiri Forest, down by the slingshot target. Two Skull Kids sit on stumps.", "Stand on the small stump to the right of the target tree and take out the Ocarina. Repeat their tunes for three rounds. The first two pay rupees, the third pays the piece."],
+  ]},
+  { id: "hyrule-field", list: [
+    ["hhf1","C","","", "A chest that's already been opened", "Western Hyrule Field near the Gerudo Valley entrance, where the ground turns red. The chest sits in a hollow under a rock overhang.", "Visit first as adult Link: the chest is open and empty, and a Fairy's Thought beside it explains why. Read it, then come back as young Link and open the chest."],
+    ["hhf2","C","","Bombs", "A password by the moat", "Outside the Market drawbridge, along the moat to the east. A hole next to a tree leads down to a Business Scrub.", "As adult Link, read the Fairy's Thought on that tree to learn the scrub's password. Then come back as young Link, bomb open the hole and drop in. Pick the password line when he talks and buy the piece for 100 rupees."],
+  ]},
+  { id: "hyrule-castle", list: [
+    ["hhc1","C","N","", "A lost white dog", "The Market at night. Richard is a white dog running around a back alley.", "Talk to Richard so he follows you, then walk him to his owner by the Market entrance from Hyrule Field. If you bring the wrong dog, try another one."],
+    ["hhc2","C","N","", "Five rooms of two chests", "The Treasure Chest Shop, on a side street to the left of the Market square. Open only at night, 10 rupees a game.", "Each room has two chests and only one holds the key to the next room. Clear all five rooms and open the big prize chest. The Lens of Truth shows which chest has the key."],
+    ["hhc3","C","","Bombs", "Win the right prize at the alley", "Bombchu Bowling, on the west side of the Market square. It opens once you've beaten King Dodongo.", "The prize changes each game and she tells you what it is before you pay. Play until she offers the Piece of Heart, then clear all three stages."],
+  ]},
+  { id: "lon-lon-ranch", list: [
+    ["hllr1","C","","", "A crawl behind the crates", "The old stone storage tower at the back of Lon Lon Ranch, behind the horse pen.", "Push the crates in its corner aside to open a crawlspace, crawl to the end, and the piece is waiting there."],
+  ]},
+  { id: "kakariko", list: [
+    ["hkak1","B","","", "A ledge behind the elder's roof", "On a small red-tiled roof behind Impa's House, against the mountain.", "Young Link: talk to the owl at the top of Death Mountain Trail and let him fly you down to Impa's roof. Adult Link: Hookshot up. From the blue roof, drop onto the small roof behind it and take the piece."],
+    ["hkak2","B","","", "A man who won't come down", "A man sits on the roof of the house next to the watchtower, opposite the windmill.", "Young Link: carry a Cucco from near the windmill and glide over to the roof. Adult Link: stand on the railing opposite the windmill and Hookshot onto the roof edge. Talk to him for the piece."],
+    ["hkak3","A","","", "High in the windmill", "Inside the windmill, on top of a cabinet on the high walkway.", "As adult Link, finish Dampé's race in the Graveyard. The tunnel out of his grave comes up at the top of the windmill. Climb onto the cabinet by the wall and take the piece."],
+    ["hkak4","B","","50 Skulltula tokens", "Halfway to lifting the curse", "The House of Skulltula, the first house on the right as you enter Kakariko.", "Collect 50 Gold Skulltula tokens and talk to the cursed man inside. He gives you the piece."],
+    ["hgy1","B","","", "A grave that opens", "The upper Graveyard near the Royal Family's Tomb, Facing the Royal Family's Tomb, it's the right-most grave in the upper row.", "Pull back the gravestone and drop into the hole. The chest with the piece is at the end of the crypt. Adult Link can open it any time. Young Link can only do it at night, because the boy guarding the graves stops you by day."],
+    ["hgy2","C","N","", "Pay the gravedigger to dig", "The Graveyard at night. Dampé the gravekeeper offers his gravedigging tour.", "Accept the tour, stand by a dirt mound and ask him to dig. Each try costs 10 rupees. The piece is in a random spot, so keep paying until it turns up. If he hits something hard and asks for more, say yes."],
+    ["hgy3","A","","Magic Bean", "A ledge over the graves", "On a stone pillar up on the Graveyard's left wall, above Dampé's grave and the soft soil.", "Plant a Magic Bean in that soil as young Link. Come back as adult Link, ride the bean platform up to the ledge and grab the piece."],
+    ["hgy4","A","","", "Race the ghost again", "Dampé's grave, the flowered gravestone in the fenced area on the left of the Graveyard.", "The first race against Dampé's ghost wins the Hookshot. Race him again and reach the end in one minute or less for the piece."],
+  ]},
+  { id: "death-mountain-trail", list: [
+    ["hdmt1","A","","Magic Bean", "A nook above the cavern mouth", "In a nook in the rock above the entrance to Dodongo's Cavern.", "Plant a Magic Bean in the soil by the cavern entrance as young Link. Come back as adult Link, ride the bean platform and step off when it passes the ledge."],
+  ]},
+  { id: "goron-city", list: [
+    ["hgc1","C","","Bombs or Goron's Bracelet, Zelda's Lullaby or Din's Fire", "Light it up, then feed it a bomb", "The big spinning pot with faces in the middle of Goron City's lowest floor.", "Light all the torches around the pot as young Link to start it spinning. A Deku Stick lit in Darunia's room works (play Zelda's Lullaby at his door), or Din's Fire. Then go up a floor, stand on the wooden plank above the pot and drop a bomb or a Bomb Flower in. Repeat until it gives you the piece."],
+  ]},
+  { id: "death-mountain-crater", list: [
+    ["hdmc1","B","","", "Down the wall from the summit door", "Death Mountain Crater, below the landing at the summit entrance. Climbing nets hang over the edge.", "Climb down the nets. The piece is a short way down, in a hollow between two of them. As young Link the heat drains you fast, so be quick. As adult Link the Goron Tunic gives you all the time you need."],
+    ["hdmc2","C","","", "A scrub who sells after a beating", "Death Mountain Crater, entered from the summit as young Link. Go left from the entrance toward the Great Fairy, down to the lower ledge by a climbing net.", "A Business Scrub pops up and shoots at you. Block or dodge his shots, get close and hit him. When he gives up, talk to him and buy the piece for 100 rupees."],
+    ["hdmc3","A","","Magic Bean, Bolero of Fire, Goron Tunic", "Atop a rock in the lava", "On top of one of the tall rocks in the middle of the crater.", "As young Link, warp in with the Bolero of Fire and plant a Magic Bean in the soil by the warp pad. Come back as adult Link with the Goron Tunic on, ride the bean platform and step off onto the rock holding the piece."],
+  ]},
+  { id: "zoras-river", list: [
+    ["hzr1","B","","", "An island in the middle of the river", "A tall platform surrounded by water in the middle of Zora's River.", "Young Link: climb the vines to the wooded ledge beside it. A grotto there holds a Cucco. If the hole is closed, bomb the cracked spot to open it. Carry it out, run to the edge and glide over to the platform. Adult Link can reach it on a bean platform or with the Hover Boots."],
+    ["hzr2","C","","", "A ledge by the falls", "A separate ledge beside the waterfall that hides the way into Zora's Domain.", "Pick up the Cucco near the bean seller at the start of the river and carry it all the way up. At the top by the waterfall, jump and glide over to the ledge."],
+    ["hzr3","C","","Song of Storms", "Make it rain for the frogs", "The frogs on a log in a cave pond, halfway up Zora's River.", "As young Link, play the Song of Storms to them. They give you the piece."],
+    ["hzr4","C","","Zelda's Lullaby, Epona's Song, Saria's Song, Sun's Song, Song of Time", "Feed the frog choir", "The same frogs on the log, halfway up Zora's River.", "As young Link, play them Zelda's Lullaby, Epona's Song, Saria's Song, Sun's Song and Song of Time. Each new song grows one frog. Once all five are grown they start a game: when a bug lands over a frog, play that frog's note fast. Finish the whole sequence for the piece."],
+  ]},
+  { id: "zoras-domain", list: [
+    ["hzd1","C","","", "Every torch at once", "Zora's Domain. The chest appears behind the waterfall on the lowest floor.", "As young Link, light a Deku Stick on a torch in King Zora's room and carry the flame down. Light the torch at the foot of the stairs first (it stays lit), then the four short-lived ones: in front of the shop, by the pond in the ring of rocks, and the two behind the waterfall. Relight your stick on each torch as you go. Open the chest that appears."],
+  ]},
+  { id: "zoras-fountain", list: [
+    ["hzf1","A","","", "The farthest iceberg", "The frozen Zora's Fountain, on top of the iceberg farthest from the path to the Ice Cavern.", "As adult Link, jump from iceberg to iceberg out to the last one. They're slippery, so judge each jump. If you fall in, swim back to the start and climb up again."],
+    ["hzf2","A","","Iron Boots, Zora Tunic", "Down among the green rupees", "The bottom of Zora's Fountain, among a scatter of green rupees.", "As adult Link, put on the Zora Tunic, step into the water and equip the Iron Boots to sink to the bottom. Take the piece, then take the boots off to float back up."],
+  ]},
+  { id: "lake-hylia", list: [
+    ["hlh1","C","","", "A big catch as a kid", "The Fishing Pond, on an islet at Lake Hylia. The owner rents you a rod for 10 rupees.", "Catch a big fish as young Link and have the owner measure it. Three guides say 55 cm or more wins the piece, two say anything over 50 cm, so aim for 55. The big ones usually swim in the middle of the pond."],
+    ["hlh2","A","","Magic Bean", "The top of the lab tower", "The lookout at the very top of the Lakeside Laboratory tower.", "Plant a Magic Bean in the soil next to the lab as young Link. As adult Link, ride the bean platform. It circles the lake and drops you on the tower's wooden balcony. Climb the ladder to the top for the piece."],
+    ["hlh3","B","","Golden Scale", "Touch the bottom of the tank", "The deep diving tank inside the Lakeside Laboratory.", "With the Golden Scale (a prize from the Fishing Pond), dive to the bottom of the tank without Iron Boots. Come back up and talk to the scientist for the piece."],
+  ]},
+  { id: "gerudo-valley", list: [
+    ["hgv1","B","","", "A chest on the canyon wall", "Gerudo Valley, on a narrow ledge partway down the canyon below the carpenters' tent side, under the dark rock piles by the stone arch.", "Young Link: carry the Cucco from near the bridge and glide down to the ledge. Adult Link: drop from the edge above. Open the chest. To leave, follow the ledge and jump into the river, which carries you to Lake Hylia."],
+    ["hgv2","B","","", "A room behind the falls", "A small room cut into the rock behind the big waterfall, above the river.", "Get down to the cow's nook at the foot of the waterfall, by gliding with the Cucco or jumping in the river and swimming over. Follow the bank toward the falls, past the Gossip Stone, hop across the wet rocks behind the water and climb the carved steps to the piece."],
+  ]},
+  { id: "gerudo-fortress", list: [
+    ["hgf1","A","","Scarecrow's Song, Hookshot", "A chest on the highest roof", "The highest rooftop of Gerudo's Fortress, against the cliff, across a gap.", "From the inner corridors, take the ladder beside the cell you were held in. It leads out to a rock ledge above the roofs. At the edge facing the chest, play the Scarecrow's Song to summon Pierre on the far side, then Hookshot or Longshot over to him. Most guides use Pierre here; one says the Longshot alone reaches."],
+    ["hgf2","A","","Gerudo Membership Card, Epona, Fairy Bow", "A thousand points on horseback", "The horseback archery range at Gerudo's Fortress. Play in the daytime, since the attendant won't let you play at night. 30 rupees a run.", "Epona runs the course on her own while you shoot targets and jars with 20 arrows. Each jar or bullseye is 100 points. Score 1,000 or more for the piece, and 1,400 also wins a bigger quiver."],
+  ]},
+  { id: "desert-colossus", list: [
+    ["hcol1","A","","Magic Bean", "On the arch by the temple", "On top of the stone arch near the Spirit Temple entrance.", "As young Link, warp in with the Requiem of Spirit and plant a Magic Bean in the soil left of the temple entrance. Come back as adult Link and ride the bean platform. It passes two rock platforms and ends over the arch. Jump off there and take the piece."],
+  ]},
+];
+
+const REWARDS = [
+  { n: 10, name: "Adult's Wallet", desc: "Carry up to 500 rupees." },
+  { n: 20, name: "Echo Gem", desc: "Chimes near hidden spots and nearby Skulltulas. Replaces the Stone of Agony." },
+  { n: 30, name: "Giant's Wallet", desc: "Carry up to 1,000 rupees." },
+  { n: 40, name: "Bombchus (20)", desc: "A stack of Bombchus." },
+  { n: 50, name: "Piece of Heart", desc: "One quarter of a heart container." },
+  { n: 100, name: "Gold Rupee", desc: "200 rupees, collectable on every visit." },
+];
+
+// Heart areas reuse the Skulltula area names.
+HEART_AREAS.forEach(h => { const a = AREAS.find(x => x.id === h.id); h.name = a.name; h.group = a.group; });
+
+// Two collections share the area pages, counters and item locks.
+const COLS = {
+  sk: { key: "sk", areas: AREAS, total: 100, unit: "token", units: "tokens", noun: "Skulltula", title: "Skulltula Tracker", icon: "i-token", base: "" },
+  hp: { key: "hp", areas: HEART_AREAS, total: 36, unit: "piece", units: "pieces", noun: "Heart Piece", title: "Pieces of Heart", icon: "i-heart", base: "hearts/" },
+};
+Object.values(COLS).forEach(c => { c.rows = c.areas.flatMap(a => a.list); c.ids = new Set(c.rows.map(s => s[0])); });
+const colOf = id => COLS.hp.ids.has(id) ? COLS.hp : COLS.sk;
+const ALL = [...COLS.sk.ids, ...COLS.hp.ids];
+
+// ---------- State ----------
+const LS_KEY = "sk-tracker-v1";
+let state = { got: [], claimed: [], items: [], updatedAt: 0 };
+let ui = { age: "all", hideGot: false, hideLocked: false, open: null, view: "photo" };
+try { const s = JSON.parse(localStorage.getItem(LS_KEY) || "null"); if (s && Array.isArray(s.got)) state = s; } catch (e) {}
+try { const u = JSON.parse(localStorage.getItem(LS_KEY + "-ui") || "null"); if (u) { ui.age = u.age || "all"; ui.hideGot = !!u.hideGot; ui.hideLocked = !!u.hideLocked; ui.view = u.view === "map" ? "map" : "photo"; } } catch (e) {}
+let got = new Set(state.got.filter(id => ALL.includes(id)));
+let claimed = new Set(state.claimed);
+let owned = new Set(state.items || []);
+
+// ---------- Sync (account storage when available, device storage always) ----------
+let remote = null, writing = false, pending = false, syncLabel = "Saved on this device";
+function snapshot() { return { got: [...got], claimed: [...claimed], items: [...owned], updatedAt: Date.now() }; }
+function saveLocal(s) { try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch (e) {} }
+let saveTimer = null;
+// Phone app only: mirror progress to a backup file the user picked, which survives a reinstall.
+const NATIVE = window.SKNative || null;
+let backupName = "", backupMsg = "";
+try { if (NATIVE) backupName = NATIVE.fileName() || ""; } catch (e) {}
+function writeBackup() { if (NATIVE && backupName) try { NATIVE.write(JSON.stringify(state)); } catch (e) {} }
+function backupLabel() { return backupName ? `Saved on this device and in ${backupName}` : syncLabel; }
+window.skBackupLinked = (name, text) => {
+  if (text) {
+    let f = null;
+    try { f = JSON.parse(text); } catch (e) {}
+    if (!f || !Array.isArray(f.got)) {
+      try { NATIVE.unlink(); } catch (e) {}
+      backupName = ""; backupMsg = `${name} isn't a Skulltula Tracker backup, so nothing changed.`;
+      render(); return;
+    }
+    if ((f.updatedAt || 0) >= (state.updatedAt || 0)) { adopt(f); backupMsg = `Progress restored from ${name}.`; }
+    else backupMsg = `Your progress on this phone is newer than ${name}, so the file was updated instead.`;
+  } else backupMsg = "";
+  backupName = name;
+  writeBackup(); render();
+};
+window.skBackupFailed = () => { backupMsg = `Couldn't write to ${backupName}. Pick the file again.`; backupName = ""; render(); };
+function save() {
+  const s = snapshot(); state = s; saveLocal(s); writeBackup();
+  if (!remote) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(pushRemote, 600);
+}
+async function pushRemote() {
+  if (!remote) return;
+  if (writing) { pending = true; return; }
+  writing = true;
+  try { await remote.set(state); syncLabel = "Saved to your account"; }
+  catch (e) { syncLabel = "Couldn't reach your account. Saved on this device."; }
+  writing = false; renderSync();
+  if (pending) { pending = false; pushRemote(); }
+}
+function adopt(s) {
+  got = new Set((s.got || []).filter(id => ALL.includes(id)));
+  claimed = new Set(s.claimed || []);
+  owned = new Set(s.items || []);
+  state = { got: [...got], claimed: [...claimed], items: [...owned], updatedAt: s.updatedAt || 0 };
+  saveLocal(state);
+}
+async function initSync() {
+  if (!window.claude || typeof window.claude.use !== "function") return;
+  try {
+    const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+    if (!db || !user) return;
+    const id = await user.id();
+    if (!id) return;
+    remote = db.doc("data/users/" + id + "/progress");
+    const snap = await remote.get();
+    const r = snap.exists ? snap.data() : null;
+    if (r && (r.updatedAt || 0) >= (state.updatedAt || 0)) { adopt(r); render(); }
+    else if (state.updatedAt) { await pushRemote(); }
+    syncLabel = "Saved to your account";
+    renderSync();
+  } catch (e) { remote = null; }
+}
+async function refreshRemote() {
+  if (!remote || writing) return;
+  try {
+    const snap = await remote.get();
+    const r = snap.exists ? snap.data() : null;
+    if (r && (r.updatedAt || 0) > (state.updatedAt || 0)) { adopt(r); render(); }
+  } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshRemote(); });
+
+// Screenshots exist only in the phone-app build, which defines window.SK_IMG.
+const SK_IMG = window.SK_IMG || {};
+// Area maps and marker spots (from Nintenduo's remake map) also exist only in the app build.
+const SK_MAP = window.SK_MAP || {};
+
+function pinStyle(m) { return `left:${(m.x * 100).toFixed(2)}%;top:${(m.y * 100).toFixed(2)}%`; }
+function media(id) {
+  const shot = SK_IMG[id], map = SK_MAP[id];
+  if (!shot && !map) return "";
+  const view = !shot ? "map" : !map ? "photo" : ui.view;
+  const toggle = shot && map ? `<div class="seg" role="group" aria-label="Show photo or map">
+      <button type="button" data-view="photo" aria-pressed="${view === "photo"}">Photo</button>
+      <button type="button" data-view="map" aria-pressed="${view === "map"}">Map</button>
+    </div>` : "";
+  const body = view === "map"
+    ? `<button type="button" class="map" data-zoom="${id}" data-kind="map" aria-label="Enlarge map" style="aspect-ratio:${map.aspect}">
+        <img src="${map.src}" alt="Map of this area${map.floor ? `, ${esc(map.floor)}` : ""}, with the spot marked">
+        <span class="pin" style="${pinStyle(map)}"></span>
+        ${map.floor ? `<span class="floor">${esc(map.floor)}</span>` : ""}
+      </button>`
+    : `<button type="button" class="shot" data-zoom="${id}" data-kind="photo" aria-label="Enlarge screenshot"><img src="${shot}" alt="Screenshot of this spot" width="768" height="432" loading="lazy"></button>`;
+  return `<div class="media">${toggle}${body}</div>`;
+}
+// ---------- Helpers ----------
+const ELEMENT = {
+  "kokiri-forest": "forest", "lost-woods": "forest", "deku-tree": "forest", "forest-temple": "forest",
+  "hyrule-field": "light", "hyrule-castle": "light", "lon-lon-ranch": "light",
+  "kakariko": "shadow", "bottom-of-the-well": "shadow", "shadow-temple": "shadow",
+  "death-mountain-trail": "fire", "death-mountain-crater": "fire", "goron-city": "fire", "dodongos-cavern": "fire", "fire-temple": "fire",
+  "zoras-river": "water", "zoras-domain": "water", "zoras-fountain": "water", "lake-hylia": "water", "jabu-jabu": "water", "ice-cavern": "water", "water-temple": "water",
+  "gerudo-valley": "spirit", "gerudo-fortress": "spirit", "haunted-wasteland": "spirit", "desert-colossus": "spirit", "spirit-temple": "spirit",
+};
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const use = (id, size, vb = "0 0 24 24") => `<svg width="${size}" height="${size}" viewBox="${vb}" aria-hidden="true"><use href="#${id}"/></svg>`;
+const ageChip = a => a === "C" ? `<span class="chip child">${use("i-forest", 12)}Child</span>` : a === "A" ? `<span class="chip adult">${use("i-sword", 12)}Adult</span>` : `<span class="chip both">${use("i-light", 12)}Child or adult</span>`;
+const nightChip = t => t === "N" ? `<span class="chip night">${use("i-moon", 12)}Night</span>` : "";
+const ICON_CHEV = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+function areaCount(a) { return a.list.filter(s => got.has(s[0])).length; }
+function persistUi() { try { localStorage.setItem(LS_KEY + "-ui", JSON.stringify({ age: ui.age, hideGot: ui.hideGot, hideLocked: ui.hideLocked, view: ui.view })); } catch (e) {} }
+function medal(a, size) {
+  const c = areaCount(a), t = a.list.length, el = ELEMENT[a.id] || "light";
+  const r = size / 2 - 3, circ = 2 * Math.PI * r, off = circ * (1 - c / t);
+  return `<span class="medal" style="--el: var(--${el})">
+    <svg class="track" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true">
+      <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="rgba(212,175,96,.18)" stroke-width="3"/>
+      <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+    </svg>
+    <span class="core">${use("i-" + el, Math.round(size * 0.36))}</span>
+  </span>`;
+}
+
+// ---------- Items and requirements ----------
+const G = (d, extra = "") => `<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ${extra}>${d}</svg>`;
+const NOTE = '<path d="M9 18V5l10-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="16.5" cy="16" r="2.5" fill="currentColor"/>';
+const ITEMS = [
+  { id: "master-sword", name: "Master Sword", group: "Gear", note: "Lets you play as adult Link", glyph: '<path d="M20.5 3.5l-.7 3.7-9.4 9.4-3-3 9.4-9.4z"/><path d="M5.5 11.5l7 7M8 16l-2.6 2.6"/><circle cx="4.3" cy="19.7" r="1.3" fill="currentColor"/>' },
+  { id: "slingshot", name: "Slingshot", group: "Gear", glyph: '<path d="M7 3v4.500a5 5 0 0 0 10 0V3"/><path d="M12 12.500V21"/><path d="M7 4.500q5 3.500 10 0" stroke-width="1.200"/>' },
+  { id: "boomerang", name: "Boomerang", group: "Gear", glyph: '<path d="M3.500 16.500L12.500 4l8 14.500-3.300 1.700-5.200-9.200-5.700 8z"/>' },
+  { id: "bombs", name: "Bombs", group: "Gear", glyph: '<circle cx="10" cy="14" r="6.5"/><path d="M14.5 9.5l2.5-2.5"/><path d="M18 4l1-1M19.5 6.5H21M17.5 2.5V4"/>' },
+  { id: "bottle", name: "Empty Bottle", group: "Gear", note: "For bugs and Blue Fire", glyph: '<path d="M9.5 2.5h5M10.5 2.5v4.5L7 11.5v10h10v-10L13.5 7V2.5"/><path d="M7 14h10"/>' },
+  { id: "beans", name: "Magic Beans", group: "Gear", glyph: '<ellipse cx="9" cy="13" rx="4" ry="5.5" transform="rotate(-20 9 13)"/><ellipse cx="16" cy="11" rx="3.5" ry="5" transform="rotate(20 16 11)"/>' },
+  { id: "hookshot", name: "Hookshot", group: "Gear", glyph: '<rect x="3" y="13.500" width="8" height="5.500" rx="1.500" transform="rotate(-45 7 16.250)"/><path d="M11 13l3.800-3.800" stroke-dasharray=".1 2.500"/><path d="M20.500 3.500l-2.600 6-3.400-3.400z"/>' },
+  { id: "longshot", name: "Longshot", group: "Gear", note: "Also counts as Hookshot", glyph: '<rect x="2.200" y="15.300" width="6.500" height="4.800" rx="1.400" transform="rotate(-45 5.450 17.700)"/><path d="M8.800 15.200l6-6" stroke-dasharray=".1 2.400"/><path d="M20.500 3.500l-2.600 6-3.400-3.400z" fill="currentColor"/>' },
+  { id: "hammer", name: "Megaton Hammer", group: "Gear", glyph: '<path d="M5.500 3.500h10a1.500 1.500 0 0 1 1.500 1.500v4a1.500 1.500 0 0 1-1.500 1.500h-10L4 9V5z"/><path d="M10.500 10.500V21"/><path d="M8.500 21h4"/>' },
+  { id: "iron-boots", name: "Iron Boots", group: "Gear", glyph: '<path d="M8 3h6v10l5 2.5V20H6V3z"/><path d="M6 17h13"/>' },
+  { id: "silver-gauntlets", name: "Silver Gauntlets", group: "Gear", glyph: '<path d="M6 11V7h3v4M9 10V5h3v5M12 10V5h3v5M15 11V7.5h3V15a6 6 0 0 1-12 0z"/>' },
+  { id: "lens", name: "Lens of Truth", group: "Gear", glyph: '<circle cx="12" cy="11" r="5.500"/><circle cx="12" cy="11" r="1.900" fill="currentColor"/><path d="M12 2v2.500M7.200 3.300l1.100 2M16.800 3.300l-1.100 2M12 16.500V22"/>' },
+  { id: "blue-fire", name: "Blue Fire", group: "Gear", note: "Needs a bottle", glyph: '<path d="M12.5 2.5c.6 3.5 4.9 5.6 4.9 11a5.4 5.4 0 0 1-10.8 0c0-2.8 1.4-4.2 2.4-5.8.6 1.2 1 2.3 1.2 3.5 1.7-2.2 2.6-5 2.3-8.7z"/>' },
+  { id: "goron-bracelet", name: "Goron's Bracelet", group: "Gear", note: "Pick up Bomb Flowers", glyph: '<circle cx="12" cy="13" r="7"/><circle cx="12" cy="13" r="3.700"/><path d="M12 2.500l2.200 2.700-2.200 2.700-2.200-2.700z" fill="currentColor"/>' },
+  { id: "dins-fire", name: "Din's Fire", group: "Gear", glyph: '<circle cx="12" cy="12" r="8"/><path d="M12 7.5c.4 2 2.8 3.1 2.8 6.1a2.8 2.8 0 0 1-5.6 0c0-1.5.7-2.2 1.3-3.1.3.6.5 1.2.6 1.9.9-1.2 1.2-2.8.9-4.9z" fill="currentColor"/>' },
+  { id: "hover-boots", name: "Hover Boots", group: "Gear", glyph: '<path d="M8 3h6v9l5 2.5V18H6V3z"/><path d="M4 21h3M10 21h4M17 21h3"/>' },
+  { id: "goron-tunic", name: "Goron Tunic", group: "Gear", note: "Survive the Fire Temple", color: "#f07c55", glyph: '<path d="M8 3l4 2 4-2 4 4-3 3v11H7V10L4 7z"/>' },
+  { id: "zora-tunic", name: "Zora Tunic", group: "Gear", note: "Breathe underwater", color: "#62b6f2", glyph: '<path d="M8 3l4 2 4-2 4 4-3 3v11H7V10L4 7z"/>' },
+  { id: "gerudo-card", name: "Gerudo Card", group: "Gear", note: "Gerudo Membership Card", glyph: '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M7 10h6M7 14h10"/>' },
+  { id: "lullaby", name: "Zelda's Lullaby", group: "Songs", color: "#c9a4f0", glyph: NOTE },
+  { id: "sarias", name: "Saria's Song", group: "Songs", color: "#74d08a", glyph: NOTE },
+  { id: "scarecrow", name: "Scarecrow's Song", group: "Songs", color: "#f2d47c", glyph: NOTE },
+  { id: "epona", name: "Epona's Song", group: "Songs", note: "Riding Epona", color: "#d9a066", glyph: NOTE },
+  { id: "storms", name: "Song of Storms", group: "Songs", color: "#8fb0c8", glyph: NOTE },
+  { id: "time", name: "Song of Time", group: "Songs", color: "#7fd8e8", glyph: NOTE },
+  { id: "bolero", name: "Bolero of Fire", group: "Songs", color: "#f07c55", glyph: NOTE },
+  { id: "requiem", name: "Requiem of Spirit", group: "Songs", color: "#f3a64b", glyph: NOTE },
+  { id: "nocturne", name: "Nocturne of Shadow", group: "Songs", color: "#b593f2", glyph: NOTE },
+  { id: "suns-song", name: "Sun's Song", group: "Songs", color: "#ffd166", glyph: NOTE },
+  { id: "golden-scale", name: "Golden Scale", group: "Gear", note: "Dive deeper", color: "#f2d47c", glyph: '<path d="M12 3c4 3 6 6.5 6 10a6 6 0 0 1-12 0c0-3.5 2-7 6-10z"/><path d="M8.5 12.5c1.2 1 2.3 1.5 3.5 1.5s2.3-.5 3.5-1.5M9.5 16.5c.8.6 1.6.9 2.5.9s1.7-.3 2.5-.9"/>' },
+  { id: "bow", name: "Fairy Bow", group: "Gear", glyph: '<path d="M6 3c7 3 7 15 0 18"/><path d="M6 3v18"/><path d="M4 12h15M16 9l3 3-3 3"/>' },
+  { id: "zeldas-letter", name: "Zelda's Letter", group: "Quest", note: "Opens the Death Mountain gate", glyph: '<rect x="3" y="5.5" width="18" height="13" rx="1.5"/><path d="M3.5 6.5L12 13l8.5-6.5"/>' },
+  { id: "rutos-letter", name: "Ruto's Letter", group: "Quest", note: "Moves King Zora", glyph: '<path d="M9.5 2.5h5M10.5 2.5v4.5L7 11.5v10h10v-10L13.5 7V2.5"/><path d="M9.5 14h5M9.5 17h5"/>' },
+  { id: "water-medallion", name: "Water Medallion", group: "Quest", note: "Refills Lake Hylia", color: "#62b6f2", glyph: '<circle cx="12" cy="12" r="8"/><path d="M12 6.5s3.5 3.9 3.5 6.3a3.5 3.5 0 0 1-7 0c0-2.4 3.5-6.3 3.5-6.3z" fill="currentColor"/>' },
+];
+const ITEM = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+// Names used in the Skulltula data, mapped to item ids. Names not listed (Cucco, Small Key, Deku Stick) are always available.
+const ALIAS = {
+  "Bottled bug": "bottle", "Magic Bean": "beans", "Magic Beans": "beans", "Hookshot": "hookshot", "Longshot": "longshot",
+  "Boomerang": "boomerang", "Slingshot": "slingshot", "Bombs": "bombs", "Song of Storms": "storms", "Megaton Hammer": "hammer",
+  "Bolero of Fire": "bolero", "Iron Boots": "iron-boots", "Silver Gauntlets": "silver-gauntlets", "Lens of Truth": "lens",
+  "Gerudo Membership Card": "gerudo-card", "Epona": "epona", "Requiem of Spirit": "requiem", "Scarecrow's Song": "scarecrow",
+  "Song of Time": "time", "Blue Fire": "blue-fire", "Goron's Bracelet": "goron-bracelet",
+  "Saria's Song": "sarias", "Zelda's Lullaby": "lullaby", "Epona's Song": "epona", "Sun's Song": "suns-song",
+  "Golden Scale": "golden-scale", "Fairy Bow": "bow", "Zora Tunic": "zora-tunic", "Goron Tunic": "goron-tunic",
+  "Din's Fire": "dins-fire", "50 Skulltula tokens": "tokens50",
+};
+// "tokens50" isn't an inventory item: it's met once 50 Skulltula tokens are checked off.
+const skCount = () => COLS.sk.rows.filter(s => got.has(s[0])).length;
+const has = id => id === "tokens50" ? skCount() >= 50 : owned.has(id) || (id === "hookshot" && owned.has("longshot"));
+// What it takes to get into each area as young Link (c) and adult Link (a), checked against remake walkthroughs
+// (finalboss.io "Dungeon Order and Required Items", its dungeon guides, and RPG Site's 100% walkthrough).
+// Each age has a list of alternative routes; a route is a list of groups, every group must be met,
+// and a group is met by any one item in it. An empty list means that age can't do anything there.
+const WASTELAND = [["epona", "longshot"], ["gerudo-card"], ["longshot", "hover-boots"], ["lens"]];
+const ACCESS = {
+  "lost-woods": { c: [[]], a: [[["sarias"]]] },                 // adult: play Saria's Song for Mido
+  "death-mountain-trail": { c: [[["zeldas-letter"]]], a: [[]] },  // show the gate guard Zelda's Letter
+  "death-mountain-crater": { c: [[["zeldas-letter"]], [["bolero"]]], a: [[]] },
+  "goron-city": { c: [[["zeldas-letter"]]], a: [[]] },
+  "dodongos-cavern": { c: [[["zeldas-letter"], ["goron-bracelet"]]], a: [[]] }, // Bomb Flower opens the entrance
+  "zoras-domain": { c: [[["lullaby"]]], a: [[["lullaby"]]] },
+  "zoras-fountain": { c: [[["lullaby"], ["rutos-letter"]]], a: [[["lullaby"], ["rutos-letter"]]] },
+  "jabu-jabu": { c: [[["lullaby"], ["rutos-letter"], ["bottle"]]], a: [] },  // a bottled fish opens Jabu-Jabu
+  "forest-temple": { c: [], a: [[["sarias"], ["hookshot"]]] },
+  "fire-temple": { c: [], a: [[["goron-tunic"], ["hookshot"]]] },
+  "ice-cavern": { c: [], a: [[["lullaby"], ["rutos-letter"], ["hookshot"], ["bottle"]]] },
+  "water-temple": { c: [], a: [[["iron-boots"], ["hookshot"], ["zora-tunic"], ["lullaby"]]] },
+  "bottom-of-the-well": { c: [[["storms"]]], a: [] },
+  "shadow-temple": { c: [], a: [[["nocturne"], ["dins-fire"], ["lens"], ["longshot"]]] },
+  "spirit-temple": { c: [[["requiem"]]], a: [[["requiem"], ["silver-gauntlets"]]] },
+  "gerudo-valley": { c: [[]], a: [[["epona", "longshot"]]] },     // adult spots are past the broken bridge
+  "gerudo-fortress": { c: [], a: [[["epona", "longshot"]]] },
+  "haunted-wasteland": { c: [], a: [WASTELAND] },
+  "desert-colossus": { c: [[["requiem"]]], a: [[["requiem"]], WASTELAND] },
+};
+// Extra conditions for single Skulltulas.
+// The two Hyrule Field pieces need a Fairy's Thought read as adult Link first.
+const EXTRA = { lh4: [["water-medallion"]], hhf1: [["master-sword"]], hhf2: [["master-sword"]] };
+// Every route a Skulltula or Heart Piece can be reached by. It's reachable when any route is fully met.
+const PATHS = {};
+[...AREAS, ...HEART_AREAS].forEach(a => a.list.forEach(s => {
+  const own = s[3] ? s[3].split(", ").map(g => g.split(" or ").map(n => ALIAS[n.trim()]).filter(Boolean)).filter(g => g.length) : [];
+  const acc = ACCESS[a.id] || { c: [[]], a: [[]] };
+  const extra = EXTRA[s[0]] || [];
+  // Drop repeated groups, and a plain Hookshot group when the route already needs the Longshot.
+  const tidy = route => {
+    const seen = new Set();
+    const out = route.filter(g => { const k = g.slice().sort().join("|"); if (seen.has(k)) return false; seen.add(k); return true; });
+    return seen.has("longshot") ? out.filter(g => g.join("|") !== "hookshot") : out;
+  };
+  const child = acc.c.map(r => tidy([...r, ...own, ...extra]));
+  const adult = acc.a.map(r => tidy([["master-sword"], ...r, ...own, ...extra]));
+  PATHS[s[0]] = s[1] === "C" ? child : s[1] === "A" ? adult : [...child, ...adult];
+}));
+const missingIn = path => path.filter(g => !g.some(has));
+// The route with the fewest missing groups; used for the "Needs" line and the "You need" list.
+const bestPath = id => PATHS[id].length === 0 ? [] : PATHS[id].reduce((b, p) => missingIn(p).length < missingIn(b).length ? p : b);
+const missing = id => missingIn(bestPath(id));
+const canGet = id => PATHS[id].some(p => missingIn(p).length === 0);
+const left = list => list.filter(s => !got.has(s[0]) && canGet(s[0])).length;
+const ALL_ROWS = [...COLS.sk.rows, ...COLS.hp.rows];
+const colGot = col => col.rows.filter(s => got.has(s[0])).length;
+const ICON_LOCK = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const itemName = i => i === "tokens50" ? "50 Skulltula tokens" : ITEM[i].name;
+const groupName = g => g.map(itemName).join(" or ");
+
+// ---------- Rendering ----------
+function renderHeader(route) {
+  const col = route.col, total = colGot(col), now = left(col.rows);
+  $("total").textContent = total;
+  $("totalOf").textContent = ` / ${col.total} ${col.units}`;
+  $("ringArc").setAttribute("stroke-dashoffset", (175.9 * (1 - total / col.total)).toFixed(1));
+  $("ring").setAttribute("aria-label", `${total} of ${col.total} ${col.units}`);
+  $("ringIcon").setAttribute("href", "#" + col.icon);
+  $("ring").classList.toggle("heart", col.key === "hp");
+  $("leftNow").textContent = total === col.total ? "" : ` · ${now} reachable`;
+  if (col.key === "hp") {
+    const hearts = Math.floor(total / 4), rest = 4 - (total % 4);
+    $("next").innerHTML = total === col.total
+      ? `<strong>Every piece found</strong>: 9 extra hearts`
+      : `<strong>${hearts} extra heart${hearts === 1 ? "" : "s"}</strong> · ${rest} more for the next`;
+  } else {
+    const nextR = REWARDS.find(r => r.n > total);
+    const ready = REWARDS.filter(r => r.n <= total && !claimed.has(r.n)).length;
+    $("next").innerHTML = ready
+      ? `<strong>${ready} reward${ready > 1 ? "s" : ""}</strong> waiting in Kakariko`
+      : nextR
+        ? `${nextR.n - total} more for <strong>${esc(nextR.name)}</strong>`
+        : `<strong>Every token found</strong>`;
+  }
+  const area = route.area;
+  $("title").textContent = area ? area.name : route.name === "rewards" ? "Rewards" : route.name === "items" ? "Items" : col.title;
+  $("back").hidden = !area;
+  $("back").setAttribute("href", "#" + col.base);
+  $("back").setAttribute("aria-label", col.key === "hp" ? "All heart areas" : "All areas");
+  $("ring").hidden = !!area;
+  document.querySelector(".top").classList.toggle("in-area", !!area);
+  ["tabAreas", "tabHearts", "tabItems", "tabRewards"].forEach(t => $(t).removeAttribute("aria-current"));
+  $(route.name === "rewards" ? "tabRewards" : route.name === "items" ? "tabItems" : col.key === "hp" ? "tabHearts" : "tabAreas").setAttribute("aria-current", "page");
+}
+
+// Nine heart outlines that fill a quarter at a time as pieces come in.
+function heartMeter() {
+  const n = colGot(COLS.hp);
+  const hearts = Array.from({ length: 9 }, (_, i) => {
+    const q = Math.max(0, Math.min(4, n - i * 4));
+    return `<svg class="hm" viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+      <clipPath id="hq${i}"><rect x="0" y="0" width="${q >= 2 ? 24 : q >= 1 ? 12 : 0}" height="${q >= 4 ? 24 : 12}"/>${q === 3 ? '<rect x="0" y="12" width="12" height="12"/>' : ""}</clipPath>
+      <use href="#i-heart" class="hm-bg"/><use href="#i-heart" class="hm-fill" clip-path="url(#hq${i})"/>
+    </svg>`;
+  }).join("");
+  return `<div class="meter panel" role="img" aria-label="${Math.floor(n / 4)} of 9 extra hearts, ${n % 4} of 4 pieces toward the next">
+      <div class="hearts">${hearts}</div>
+      <p class="note">Every 4 pieces make one heart container. All 36 add 9 hearts.</p>
+    </div>`;
+}
+
+function renderHome(col) {
+  return (col.key === "hp" ? heartMeter() : "") + ["Overworld", "Dungeons"].map(g => {
+    const areas = col.areas.filter(a => a.group === g);
+    if (!areas.length) return "";
+    const n = areas.reduce((t, a) => t + areaCount(a), 0);
+    const of = areas.reduce((t, a) => t + a.list.length, 0);
+    const l = areas.reduce((t, a) => t + left(a.list), 0);
+    return `<section class="section" aria-labelledby="g-${g}">
+      <h2 class="orn" id="g-${g}"><span class="gem"></span>${g}<small>${n}/${of} · ${l} reachable</small><span class="gem"></span></h2>
+      <div class="grid">${areas.map(a => {
+        const c = areaCount(a), t = a.list.length, l = left(a.list);
+        const tag = c === t ? "" : l ? `<span class="avail">${l} reachable</span>` : `<span class="avail none">${ICON_LOCK}Need items</span>`;
+        return `<a class="area panel${c === t ? " done" : ""}${c < t && !l ? " blocked" : ""}" href="#${col.base}${a.id}">
+          ${medal(a, 64)}
+          <span class="area-name">${esc(a.name)}</span>
+          <span class="area-count"><b>${c}</b> of ${t}</span>
+          ${tag}
+        </a>`;
+      }).join("")}</div>
+    </section>`;
+  }).join("") + backupCard(false) + `<p class="sync" id="sync">${esc(backupLabel())}</p>`;
+}
+function backupCard(always) {
+  if (!NATIVE || (backupName && !always)) return "";
+  const msg = backupMsg ? `<p class="note" role="status">${esc(backupMsg)}</p>` : "";
+  if (backupName) return `${msg}<div class="reset-row"><button type="button" class="btn" id="bkOpen">Restore from a file</button><button type="button" class="btn" id="bkCreate">Use a new file</button></div>`;
+  return `<div class="note-panel panel backup">
+      <h3>Keep progress after a reinstall</h3>
+      <p class="note">Uninstalling the app erases its storage. Pick a backup file in Downloads or Drive and every change is copied there. After a reinstall, tap Restore and choose the same file.</p>
+      ${msg}
+      <div class="reset-row"><button type="button" class="btn" id="bkCreate">Create backup file</button><button type="button" class="btn" id="bkOpen">Restore from a file</button></div>
+    </div>`;
+}
+
+let popId = null;
+function renderArea(a, col) {
+  const items = a.list.filter(s => {
+    if (ui.hideGot && got.has(s[0])) return false;
+    if (ui.hideLocked && !got.has(s[0]) && !canGet(s[0])) return false;
+    if (ui.age === "child" && s[1] === "A") return false;
+    if (ui.age === "adult" && s[1] === "C") return false;
+    return true;
+  });
+  const c = areaCount(a), t = a.list.length, l = left(a.list), locked = t - c - l;
+  const seg = ["all", "child", "adult"].map(k => `<button type="button" data-age="${k}" aria-pressed="${ui.age === k}">${k === "all" ? "All" : k[0].toUpperCase() + k.slice(1)}</button>`).join("");
+  const list = items.length ? items.map(s => {
+    const [id, age, time, needs, hint, where, how] = s;
+    const isGot = got.has(id), isOpen = ui.open === id;
+    const miss = missing(id), isLocked = !isGot && miss.length > 0;
+    const reqs = bestPath(id);
+    return `<article class="item panel${isGot ? " got" : ""}${isLocked ? " locked" : ""}${isOpen ? " is-open" : ""}">
+      <div class="item-head">
+        <button type="button" class="open" data-open="${id}" aria-expanded="${isOpen}" aria-controls="d-${id}">
+          <span class="hint">${esc(hint)}</span>
+          <span class="chips">${ageChip(age)}${nightChip(time)}<span class="more">${isOpen ? "Less" : "Details"}${ICON_CHEV}</span></span>
+          ${isLocked ? `<span class="needs-line">${ICON_LOCK}Needs ${esc(miss.map(groupName).join(", "))}</span>` : ""}
+        </button>
+        <button type="button" class="check${popId === id ? " pop" : ""}" data-check="${id}" aria-pressed="${isGot}" aria-label="${isGot ? "Mark as not found" : "Mark as found"}: ${esc(hint)}">
+          <svg class="tok" viewBox="${col.key === "hp" ? "0 0 24 24" : "0 0 32 32"}" aria-hidden="true"><use href="#${col.icon}"/></svg>
+          <span>${isGot ? "Got it" : "Found?"}</span>
+        </button>
+      </div>
+      <div class="detail" id="d-${id}"${isOpen ? "" : " hidden"}>
+        ${media(id)}
+        <div><h3>Where</h3><p>${esc(where)}</p></div>
+        <div><h3>How to get it</h3><p>${esc(how)}</p></div>
+        ${reqs.length ? `<div><h3>You need</h3><div class="needs">${reqs.map(g => {
+          const ok = g.some(has);
+          if (g.length === 1 && g[0] === "tokens50") return `<span class="need${ok ? " have" : ""}">${ok ? "" : ICON_LOCK}50 Skulltula tokens</span>`;
+          return `<button type="button" class="need${ok ? " have" : ""}" data-item="${g.find(has) || g[0]}" aria-pressed="${ok}" title="${ok ? "You have this" : "Tap if you have it"}">${ok ? "" : ICON_LOCK}${esc(groupName(g))}</button>`;
+        }).join("")}</div><p class="need-tip">Tap an item to mark it as owned.</p></div>` : ""}
+      </div>
+    </article>`;
+  }).join("") : `<p class="empty panel">${ui.hideGot || ui.hideLocked ? "Nothing left here that matches these filters." : "Nothing matches this filter."}</p>`;
+  return `<div class="area-hero panel${c === t ? " done" : ""}">
+      ${medal(a, 56)}
+      <p><b>${c} of ${t} found</b>${c === t ? "This area is complete." : `${l} reachable now${locked ? `, ${locked} need items` : ""}.`}</p>
+    </div>
+    <div class="filters">
+      <div class="seg" role="group" aria-label="Filter by age">${seg}</div>
+      <div class="toggles">
+        <button type="button" class="toggle" id="hideGot" aria-pressed="${ui.hideGot}"><span class="sw"></span>Hide found</button>
+        <button type="button" class="toggle" id="hideLocked" aria-pressed="${ui.hideLocked}"><span class="sw"></span>Hide locked</button>
+      </div>
+    </div>
+    <div class="list">${list}</div>`;
+}
+
+function renderItems() {
+  const open = ALL_ROWS.filter(s => !got.has(s[0]));
+  const openSk = open.filter(s => COLS.sk.ids.has(s[0])), openHp = open.filter(s => COLS.hp.ids.has(s[0]));
+  const nowSk = left(COLS.sk.rows), nowHp = left(COLS.hp.rows);
+  const unlocks = id => open.filter(s => PATHS[s[0]].flat().some(g => g.includes(id) || (id === "longshot" && g.includes("hookshot")))).length;
+  const groups = ["Gear", "Songs", "Quest"].map(g => `<section class="section">
+      <h2 class="orn"><span class="gem"></span>${g === "Gear" ? "Equipment" : g === "Songs" ? "Songs" : "Quest items"}<span class="gem"></span></h2>
+      <div class="slots">${ITEMS.filter(i => i.group === g).map(i => {
+        const on = owned.has(i.id) || (i.id === "hookshot" && owned.has("longshot"));
+        const implied = !owned.has(i.id) && on;
+        const u = unlocks(i.id);
+        return `<button type="button" class="slot${on ? " on" : ""}" data-item="${i.id}" aria-pressed="${on}" ${implied ? "disabled" : ""} style="${i.color ? `--note:${i.color}` : ""}">
+          <span class="slot-art">${G(i.glyph)}</span>
+          <span class="slot-name">${esc(i.name)}</span>
+          <span class="slot-note">${implied ? "From Longshot" : u ? `Used for ${u}` : esc(i.note || "Not needed now")}</span>
+        </button>`;
+      }).join("")}</div>
+    </section>`).join("");
+  return `<div class="note-panel panel">
+      <h3>Your inventory</h3>
+      <p class="note">Tap what you've collected. Skulltulas and Heart Pieces that need something you don't have are greyed out, and the counters only count the ones you can reach.</p>
+    </div>
+    <p class="items-sum">Reachable now: <b>${nowSk}</b> Skulltula${nowSk === 1 ? "" : "s"} and <b>${nowHp}</b> Heart Piece${nowHp === 1 ? "" : "s"} · <b>${openSk.length - nowSk + openHp.length - nowHp}</b> need more items</p>
+    ${groups}`;
+}
+
+let resetArmed = false;
+function renderRewards() {
+  const total = skCount();
+  // Fill the path line up to the last reached milestone.
+  const reachedIdx = REWARDS.reduce((i, r, k) => total >= r.n ? k : i, -1);
+  const steps = REWARDS.map(r => {
+    const reached = total >= r.n, isClaimed = claimed.has(r.n);
+    const cls = isClaimed ? "claimed" : reached ? "ready" : "locked";
+    const st = isClaimed ? "Collected" : reached ? "Ready to collect" : `${r.n - total} more token${r.n - total === 1 ? "" : "s"}`;
+    return `<li class="step ${cls}">
+      <span class="node"><b>${r.n}</b><small>tokens</small></span>
+      <div class="panel">
+        <span class="r-info"><span class="r-name">${esc(r.name)}</span><span class="r-desc">${esc(r.desc)}</span><span class="r-state">${st}</span></span>
+        ${reached || isClaimed ? `<button type="button" class="btn" data-claim="${r.n}" aria-pressed="${isClaimed}">${isClaimed ? "Undo" : "Collected"}</button>` : ""}
+      </div>
+    </li>`;
+  }).join("");
+  return `<section class="section">
+      <h2 class="orn"><span class="gem"></span>House of Skulltula<span class="gem"></span></h2>
+      <ul class="path" id="path" data-reached="${reachedIdx}">${steps}</ul>
+    </section>
+    <div class="note-panel panel">
+      <h3>Collecting</h3>
+      <p class="note">The cursed family lives in the House of Skulltula in Kakariko Village. Talk to them once you reach each count, then mark the reward here.</p>
+    </div>
+    <div class="note-panel panel">
+      <h3>Tip</h3>
+      <p class="note">Night-only Skulltulas leave a faint gold web on their spot during the day, so you can find them early and come back after dark.</p>
+    </div>
+    <section class="section">
+      <h2 class="orn"><span class="gem"></span>Progress<span class="gem"></span></h2>
+      <div class="reset-row">
+        <button type="button" class="btn danger" id="reset">${resetArmed ? "Tap again to clear everything" : "Clear all progress"}</button>
+        ${resetArmed ? '<button type="button" class="btn" id="resetCancel">Keep my progress</button>' : ""}
+      </div>
+      ${backupCard(true)}
+      <p class="sync" id="sync" style="text-align:left">${esc(backupLabel())}</p>
+    </section>`;
+}
+
+// Draw the gold line along the rewards path from the first node to the last one reached.
+function layoutPath() {
+  const path = $("path"); if (!path) return;
+  const idx = +path.dataset.reached;
+  path.querySelector(".fill")?.remove();
+  if (idx < 0) return;
+  const nodes = path.querySelectorAll(".node");
+  const top = nodes[0].offsetTop + nodes[0].offsetHeight / 2;
+  const end = nodes[idx].offsetTop + nodes[idx].offsetHeight / 2;
+  const fill = document.createElement("span");
+  fill.className = "fill"; fill.style.top = top + "px"; fill.style.height = Math.max(0, end - top) + "px";
+  path.prepend(fill);
+}
+
+function renderSync() { const el = $("sync"); if (el) el.textContent = backupLabel(); }
+
+function currentRoute() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h === "rewards") return { name: "rewards", col: COLS.sk };
+  if (h === "items") return { name: "items", col: COLS.sk };
+  const col = h === "hearts" || h.startsWith("hearts/") ? COLS.hp : COLS.sk;
+  const area = col.areas.find(a => col.base + a.id === h);
+  if (area) return { name: "area", area, col };
+  return { name: "home", col };
+}
+
+let lastRouteKey = "";
+// Remember how far down each list page was, so going back from an area lands where you left off.
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+let scrollPos = {};
+try { scrollPos = JSON.parse(sessionStorage.getItem(LS_KEY + "-scroll") || "{}") || {}; } catch (e) {}
+function rememberScroll() {
+  if (!lastRouteKey) return;
+  scrollPos[lastRouteKey] = Math.round(window.scrollY);
+  try { sessionStorage.setItem(LS_KEY + "-scroll", JSON.stringify(scrollPos)); } catch (e) {}
+}
+function render() {
+  const route = currentRoute();
+  const key = route.col.key + (route.area ? route.area.id : route.name);
+  renderHeader(route);
+  $("view").innerHTML = route.name === "rewards" ? renderRewards() : route.name === "items" ? renderItems() : route.area ? renderArea(route.area, route.col) : renderHome(route.col);
+  if (route.name === "rewards") layoutPath();
+  if (key !== lastRouteKey) { window.scrollTo(0, route.area ? 0 : scrollPos[key] || 0); lastRouteKey = key; resetArmed = false; }
+  popId = null;
+}
+window.addEventListener("resize", layoutPath);
+window.addEventListener("pagehide", rememberScroll);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutPath);
+
+// ---------- Events ----------
+$("view").addEventListener("click", e => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.check) {
+    const id = t.dataset.check;
+    if (got.has(id)) got.delete(id); else { got.add(id); popId = id; }
+    save(); render();
+    const again = document.querySelector(`[data-check="${id}"]`); if (again) again.focus();
+  } else if (t.dataset.open) {
+    ui.open = ui.open === t.dataset.open ? null : t.dataset.open;
+    render();
+    const again = document.querySelector(`[data-open="${t.dataset.open}"]`); if (again) again.focus();
+  } else if (t.dataset.zoom) {
+    const box = $("lightbox"), isMap = t.dataset.kind === "map", m = SK_MAP[t.dataset.zoom];
+    const img = box.querySelector("img"), pin = box.querySelector(".pin");
+    img.src = isMap ? m.src : SK_IMG[t.dataset.zoom];
+    img.alt = isMap ? "Map of this area with the spot marked" : "Screenshot of this spot";
+    pin.hidden = !isMap; if (isMap) pin.style.cssText = pinStyle(m);
+    box.setAttribute("aria-label", isMap ? "Close map" : "Close screenshot");
+    box.hidden = false; box.focus();
+  } else if (t.dataset.view) {
+    ui.view = t.dataset.view; persistUi(); render();
+    const again = document.querySelector(`#d-${ui.open} [data-view="${ui.view}"]`); if (again) again.focus();
+  } else if (t.dataset.age) {
+    ui.age = t.dataset.age; persistUi(); render();
+  } else if (t.dataset.item) {
+    const id = t.dataset.item;
+    owned.has(id) ? owned.delete(id) : owned.add(id);
+    save(); render();
+    const again = document.querySelector(`[data-item="${id}"]`); if (again) again.focus();
+  } else if (t.id === "hideLocked") {
+    ui.hideLocked = !ui.hideLocked; persistUi(); render();
+  } else if (t.id === "hideGot") {
+    ui.hideGot = !ui.hideGot; persistUi(); render();
+  } else if (t.dataset.claim) {
+    const n = +t.dataset.claim;
+    claimed.has(n) ? claimed.delete(n) : claimed.add(n);
+    save(); render();
+  } else if (t.id === "reset") {
+    if (!resetArmed) { resetArmed = true; render(); return; }
+    got.clear(); claimed.clear(); owned.clear(); resetArmed = false; save(); render();
+  } else if (t.id === "bkCreate") {
+    NATIVE.create();
+  } else if (t.id === "bkOpen") {
+    NATIVE.open();
+  } else if (t.id === "resetCancel") {
+    resetArmed = false; render();
+  }
+});
+window.addEventListener("hashchange", () => { rememberScroll(); ui.open = null; $("lightbox").hidden = true; render(); });
+$("lightbox").addEventListener("click", () => { $("lightbox").hidden = true; });
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("lightbox").hidden = true; });
+
+render();
+initSync();
+</script>
+</body></html>
